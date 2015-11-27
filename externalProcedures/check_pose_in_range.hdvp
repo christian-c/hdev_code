@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.0" halcon_version="10.0.1" cs="491997946">
+<procedure name="check_pose_in_range">
+<interface>
+<ic>
+<par name="Pose"/>
+<par name="Range"/>
+</ic>
+<oc>
+<par name="InRange"/>
+</oc>
+</interface>
+<body>
+<c>* Pose = [X, Y, Z, RotX, RotY, RotZ]</c>
+<c>* InRange の回転の単位系は [deg]</c>
+<c>* Pose/RangeのRotX,RotY,RotZはすべて 0&lt;=Rot&lt;=360 という仮定をしている．</c>
+<c>* 例えば，（-720 &lt;-&gt; 0）という範囲指定が，全範囲（0 &lt;-&gt; 360）なのか， 範囲なし（0 &lt;-&gt; 0）なのかが不定なので．</c>
+<c>* 範囲は，反時計回りで指定され，0度を跨ぐ指定も可能．（例：300 &lt;-&gt; 10)</c>
+<c>* 範囲指定が'None'の場合は，Pose範囲が 0&lt;=Rot&lt;=360 であるか否かをチェックしない．</c>
+<c></c>
+<l>if (|Pose| # 7)</l>
+<l>    H_ERR_WIPN1 := 1401</l>
+<l>    get_error_text (H_ERR_WIPN1, msg)</l>
+<l>    throw ([H_ERR_WIPN1, msg])</l>
+<l>endif</l>
+<c></c>
+<l>if (|Range| # 12)</l>
+<l>    H_ERR_WIPN2 := 1402</l>
+<l>    get_error_text (H_ERR_WIPN2, msg)</l>
+<l>    throw ([H_ERR_WIPN2, msg])</l>
+<l>endif</l>
+<c></c>
+<l>for i:=0 to 2 by 1</l>
+<l>    if (Range[i*2+6] = 'None' or Range[i*2+7] = 'None')</l>
+<c>        *pass</c>
+<l>    elseif (Pose[i+3] &lt; 0 or Pose[i+3] &gt; 360)</l>
+<l>        H_ERR_WIPV1 := 1301</l>
+<l>        get_error_text (H_ERR_WIPV1, msg)</l>
+<l>        throw ([H_ERR_WIPV1, msg])</l>
+<l>    endif</l>
+<l>    if (Range[i*2+6] = 'None' or Range[i*2+7] = 'None')</l>
+<c>        *pass</c>
+<l>    elseif (Range[i*2+6] &lt; 0 or Range[i*2+6] &gt; 360 or\
+        Range[i*2+7] &lt; 0 or Range[i*2+7] &gt; 360)</l>
+<l>        H_ERR_WIPV2 := 1302</l>
+<l>        get_error_text (H_ERR_WIPV2, msg)</l>
+<l>        throw ([H_ERR_WIPV2, msg])</l>
+<l>    endif</l>
+<l>endfor </l>
+<c></c>
+<c></c>
+<l>vec := Range[0:5]</l>
+<l>rot := Range[6:11]</l>
+<l>InRange := [true, true, true, true, true, true]</l>
+<c></c>
+<c>* vec</c>
+<l>for i:=0 to 2 by 1</l>
+<c>    *['None',*]</c>
+<l>    if (vec[i*2] = 'None' and vec[i*2+1] = 'None')</l>
+<c>        *pass</c>
+<l>    elseif (vec[i*2] = 'None' and vec[i*2+1] # 'None')</l>
+<l>        if (Pose[i] &gt; vec[i*2+1])</l>
+<l>            InRange[i] := false</l>
+<l>        endif</l>
+<l>    elseif (vec[i*2] # 'None' and vec[i*2+1] = 'None')        </l>
+<l>        if (Pose[i] &lt; vec[i*2])</l>
+<l>            InRange[i] := false</l>
+<l>        endif        </l>
+<l>    elseif (Pose[i] &lt; vec[i*2] or Pose[i] &gt; vec[i*2+1])</l>
+<l>        InRange[i] := false</l>
+<l>    endif</l>
+<l>endfor</l>
+<c></c>
+<c>* rot</c>
+<l>for i:=0 to 2 by 1</l>
+<c>    *['None',*]</c>
+<l>    if (rot[i*2] = 'None' or rot[i*2+1] = 'None')</l>
+<l>        continue</l>
+<c>    *[0,360]</c>
+<l>    elseif (rot[i*2]-rot[i*2+1] = -360)</l>
+<l>        continue</l>
+<l>    elseif (rot[i*2]-rot[i*2+1] = 0)</l>
+<c>        *[360,360], [0,0]</c>
+<l>        if (rot[i*2] = 360 or rot[i*2] = 0)</l>
+<l>            if (Pose[i+3] # 0 and Pose[i+3] # 360)</l>
+<l>                InRange[i+3] := false</l>
+<l>            else</l>
+<l>                continue</l>
+<l>            endif</l>
+<c>        *[n,n]</c>
+<l>        elseif (Pose[i+3] # rot[i*2] and Pose[i+3] # rot[i*2+1])</l>
+<l>            InRange[i+3] := false</l>
+<l>        endif</l>
+<l>    else    </l>
+<l>        if (rot[i*2] &lt;= rot[i*2+1] and (Pose[i+3] &lt; rot[i*2] or Pose[i+3] &gt; rot[i*2+1]))</l>
+<l>            InRange[i+3] := false</l>
+<l>        elseif (rot[i*2] &gt; rot[i*2+1] and (Pose[i+3] &gt; rot[i*2+1] and Pose[i+3] &lt; rot[i*2]))</l>
+<l>            InRange[i+3] := false</l>
+<l>        endif</l>
+<l>    endif</l>
+<l>endfor</l>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="check_pose_in_range">
+<parameters>
+<parameter id="InRange">
+<description lang="ja_JP">入力されたPoseの各要素（6次元）に対して，範囲に収まっているかを示す true/false が返される．
+よって，この InRange も6次元のTupleになる．</description>
+<multivalue>true</multivalue>
+</parameter>
+<parameter id="Pose"/>
+<parameter id="Range">
+<description lang="ja_JP">Rangeは，
+[vecxMin, vecxMax, vecyMin, vecyMax, veczMin, veczMax, rotxMin, rotxMax, rotyMin, rotyMax, rotzMin, rotzMax]
+の12要素から構成される．
+回転の Min &lt;-&gt; Max が指定する範囲は，Min から反時計回りで Max までの範囲となる．</description>
+<multivalue>true</multivalue>
+<sem_type>real</sem_type>
+<type_list>
+<item>real</item>
+</type_list>
+</parameter>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>

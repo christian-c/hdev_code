@@ -1,0 +1,295 @@
+2 6
+61514549
+find_caltab_auto_param 1 1 1 1
+Searche calibration plate accompanying automatic adjustment of search parameter.
+Utilities
+Image object image
+CalTabRegion object region
+CalTabDescrFilename tuple filename
+ErrorNo tuple integer
+0
+66
+comment 0 0 1 0 0 3 0 0
+* ///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+comment 0 0 1 0 0 3 0 0
+* 
+
+comment 0 0 1 0 0 3 0 0
+`* Searche calibration plate accompanying automatic adjustment of search parameter.
+Searche calibration plate accompanying automatic adjustment of search parameter.
+comment 0 0 1 0 0 3 0 0
+* 
+
+comment 0 0 1 0 0 3 0 0
+`* Usage: Reffer to the HDevelop online help.
+Usage: Reffer to the HDevelop online help.
+comment 0 0 1 0 0 3 0 0
+* 
+
+comment 0 0 1 0 0 3 0 0
+* ///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+comment 0 0 1 0 0 3 0 0
+* 
+
+assign 0 0 1 1 0 3 0 0
+ErrorNo := H_MSG_FAIL
+H_MSG_FAIL
+ErrorNo
+comment 0 0 1 0 0 3 0 0
+`*
+
+assign 0 0 1 1 0 3 0 0
+`H_ERR_CAL_RECPF := 8403
+8403
+H_ERR_CAL_RECPF
+comment 0 0 1 0 0 3 0 0
+`* 
+
+assign 0 0 1 1 0 3 0 0
+SizeGauss := 3
+3
+SizeGauss
+assign 0 0 1 1 0 3 0 0
+`MarkThresh := [30, 220, 30]
+[30, 220, 30]
+MarkThresh
+assign 0 0 1 1 0 3 0 0
+MinDiamMarks := 9
+9
+MinDiamMarks
+comment 0 0 1 0 0 3 0 0
+* 
+
+file_exists 0 0 1 1 0 1 0 0
+`file_exists (CalTabDescrFilename, fileExists)
+CalTabDescrFilename
+fileExists
+if 0 0 1 0 0 3 0 0
+`if (not fileExists)
+not fileExists
+parse_filename 0 0 1 3 1 4 0 0
+`    parse_filename (CalTabDescrFilename, BaseName, Extension, _)
+CalTabDescrFilename
+BaseName
+Extension
+_
+assign 0 0 1 1 1 3 0 0
+`    CalTabDescrFilename := BaseName + '.' + Extension
+BaseName + '.' + Extension
+CalTabDescrFilename
+endif 0 0 0 0 0 3 18 0
+`endif
+comment 0 0 1 0 0 3 0 0
+`*
+
+for 0 0 3 1 0 3 0 0
+for mark_th := MarkThresh[0] to MarkThresh[1] by MarkThresh[2]
+MarkThresh[0]
+MarkThresh[1]
+MarkThresh[2]
+mark_th
+try 0 0 0 0 1 3 0 0
+    try
+find_caltab 1 1 4 0 2 1 0 0
+        find_caltab (Image, CalTabRegion, CalTabDescrFilename, SizeGauss, mark_th, MinDiamMarks)
+Image
+CalTabRegion
+CalTabDescrFilename
+SizeGauss
+mark_th
+MinDiamMarks
+catch 0 0 0 1 1 3 24 0
+    catch (Exception)
+Exception
+if 0 0 1 0 2 3 0 0
+`        if (Exception[0] = H_ERR_CAL_RECPF)
+Exception[0] = H_ERR_CAL_RECPF
+throw 0 0 1 0 3 3 0 0
+`            throw (Exception)
+Exception
+endif 0 0 0 0 2 3 27 0
+`        endif
+ifelse 0 0 1 0 2 3 0 0
+        if (mark_th > MarkThresh[1])
+mark_th > MarkThresh[1]
+break 0 0 0 0 3 3 0 0
+            break
+else 0 0 0 0 2 3 30 0
+        else
+continue 0 0 0 0 3 3 0 0
+            continue
+endif 0 0 0 0 2 3 32 0
+        endif
+endtry 0 0 0 0 1 3 26 0
+    endtry
+comment 0 0 1 0 1 3 0 0
+`    *
+
+comment 0 0 1 0 1 3 0 0
+`    * Judge recognition 1
+Judge recognition 1
+assign 0 0 1 1 1 3 0 0
+`    judgeSpace := 3
+3
+judgeSpace
+get_image_pointer1 1 0 0 4 1 1 0 0
+`    get_image_pointer1 (Image, _, _, imgW, imgH)
+Image
+_
+_
+imgW
+imgH
+smallest_rectangle1 1 0 0 4 1 1 0 0
+`    smallest_rectangle1 (CalTabRegion, row1, col1, row2, col2)
+CalTabRegion
+row1
+col1
+row2
+col2
+assign 0 0 1 1 1 3 0 0
+`    existUpper := (row1 < 0 + judgeSpace)
+(row1 < 0 + judgeSpace)
+existUpper
+assign 0 0 1 1 1 3 0 0
+`    existRight := (col1 < 0 + judgeSpace)
+(col1 < 0 + judgeSpace)
+existRight
+assign 0 0 1 1 1 3 0 0
+`    existLower := (imgH - judgeSpace < row2)
+(imgH - judgeSpace < row2)
+existLower
+assign 0 0 1 1 1 3 0 0
+`    existLeft  := (imgW - judgeSpace < col2)
+(imgW - judgeSpace < col2)
+existLeft
+if 0 0 1 0 1 3 0 0
+`    if (existUpper + existRight + existLower + existLeft >= 3)
+existUpper + existRight + existLower + existLeft >= 3
+continue 0 0 0 0 2 3 0 0
+`        continue
+endif 0 0 0 0 1 3 45 0
+`    endif
+comment 0 0 1 0 1 3 0 0
+`    *
+
+comment 0 0 1 0 1 3 0 0
+`    * Judge recognition 2
+Judge recognition 2
+select_shape 1 1 4 0 1 1 0 0
+`    select_shape (CalTabRegion, tmp_obj, ['compactness', 'struct_factor'], 'and', [0, 0], [1.6, 0.4])
+CalTabRegion
+tmp_obj
+['compactness', 'struct_factor']
+'and'
+[0, 0]
+[1.6, 0.4]
+count_obj 1 0 0 1 1 1 0 0
+    count_obj (tmp_obj, Caltab1_ObjNum)
+tmp_obj
+Caltab1_ObjNum
+if 0 0 1 0 1 3 0 0
+`    if (Caltab1_ObjNum = 0)
+Caltab1_ObjNum = 0
+continue 0 0 0 0 2 3 0 0
+`        continue
+endif 0 0 0 0 1 3 52 0
+`    endif
+comment 0 0 1 0 1 3 0 0
+`    *
+
+comment 0 0 1 0 1 3 0 0
+`    * Recognition successful.
+Recognition successful.
+assign 0 0 1 1 1 3 0 0
+    ErrorNo := H_MSG_TRUE
+H_MSG_TRUE
+ErrorNo
+break 0 0 0 0 1 3 0 0
+    break
+endfor 0 0 0 0 0 3 23 0
+endfor
+comment 0 0 1 0 0 3 0 0
+* 
+
+if 0 0 1 0 0 3 0 0
+if (ErrorNo # H_MSG_TRUE)
+ErrorNo # H_MSG_TRUE
+comment 0 0 1 0 1 3 0 0
+`    * Set entire image to target region because calibration plate is not found.
+Set entire image to target region because calibration plate is not found.
+get_domain 1 1 0 0 1 1 0 0
+    get_domain (Image, CalTabRegion)
+Image
+CalTabRegion
+endif 0 0 0 0 0 3 61 0
+endif
+comment 0 0 1 0 0 3 0 0
+* 
+
+return 0 0 0 0 0 3 0 0
+return ()
+<proc_docu id="find_caltab_auto_param">
+  <abstract lang="en_US">Searche calibration plate accompanying automatic adjustment of search parameter.
+
+The output parameter will be as following in the case of search failure.
+* CalTabRegion : Entire image
+* ErrorNo : Other than H_MSG_TRUE 
+</abstract>
+  <abstract lang="ja_JP">キャリブレーションプレートの検索を，検索用パラメータの自動調整を伴って実施します。
+
+検索に失敗した場合は，出力パラメーターが次のようになります。
+* CalTabRegion :  画像全体
+* ErrorNo : H_MSG_TRUE 以外
+</abstract>
+  <chapters lang="en_US">
+    <item>Utilities</item>
+  </chapters>
+  <chapters lang="ja_JP">
+    <item>Utilities</item>
+  </chapters>
+  <library lang="en_US">NEXTAGE Vision Procedures</library>
+  <library lang="ja_JP">NEXTAGE Vision Procedures</library>
+  <short lang="en_US">Searche calibration plate accompanying automatic adjustment of search parameter.</short>
+  <short lang="ja_JP">キャリブレーションプレートの検索を，検索用パラメータの自動調整を伴って実施します。</short>
+  <parameters>
+    <parameter id="CalTabDescrFilename">
+      <description lang="en_US">Definition file name of calibration plate</description>
+      <description lang="ja_JP">キャリブレーションプレートの定義ファイル名</description>
+      <mixed_type>false</mixed_type>
+      <multivalue>false</multivalue>
+      <sem_type>filename</sem_type>
+      <type_list>
+        <item>string</item>
+      </type_list>
+    </parameter>
+    <parameter id="CalTabRegion">
+      <description lang="en_US">Region of recognition result</description>
+      <description lang="ja_JP">認識結果の領域</description>
+      <multivalue>false</multivalue>
+      <sem_type>region</sem_type>
+    </parameter>
+    <parameter id="ErrorNo">
+      <description lang="en_US">Success or failure of recognition (Success = H_MSG_TRUE)</description>
+      <description lang="ja_JP">認識の成否 （成功 = H_MSG_TRUE）</description>
+      <mixed_type>false</mixed_type>
+      <multivalue>false</multivalue>
+      <sem_type>integer</sem_type>
+      <type_list>
+        <item>integer</item>
+      </type_list>
+    </parameter>
+    <parameter id="Image">
+      <description lang="en_US">Target image</description>
+      <description lang="ja_JP">認識対象の画像</description>
+      <multichannel>false</multichannel>
+      <multivalue>false</multivalue>
+      <sem_type>image</sem_type>
+      <type_list>
+        <item>byte</item>
+        <item>uint2</item>
+      </type_list>
+    </parameter>
+  </parameters>
+</proc_docu>

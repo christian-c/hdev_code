@@ -1,0 +1,1566 @@
+2 6
+813540884
+init_framegrabbers 0 0 2 2
+Initialize multiple frame grabbers (cameras).
+Utilities
+IniFilename tuple filename.read
+UsingCameraNo tuple any
+FGHandles tuple framegrabber
+FGStateStrings tuple string
+0
+370
+comment 0 0 1 0 0 3 0 0
+* ///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+comment 0 0 1 0 0 3 0 0
+* 
+
+comment 0 0 1 0 0 3 0 0
+`* Initialize multiple frame grabbers (cameras).
+Initialize multiple frame grabbers (cameras).
+comment 0 0 1 0 0 3 0 0
+* 
+
+comment 0 0 1 0 0 3 0 0
+`* Usage: Reffer to the HDevelop online help.
+Usage: Reffer to the HDevelop online help.
+comment 0 0 1 0 0 3 0 0
+* 
+
+comment 0 0 1 0 0 3 0 0
+* ///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+comment 0 0 1 0 0 3 0 0
+`* 
+
+assign 0 0 1 1 0 3 0 0
+`FGHandles := []
+[]
+FGHandles
+assign 0 0 1 1 0 3 0 0
+`FGStateStrings := []
+[]
+FGStateStrings
+comment 0 0 1 0 0 3 0 0
+`*
+
+assign 0 0 1 1 0 3 0 0
+`MY_H_ERR_FGSETPAR := 5329
+5329
+MY_H_ERR_FGSETPAR
+assign 0 0 1 1 0 3 0 0
+`MY_H_ERR_WIPT2 := 1202
+1202
+MY_H_ERR_WIPT2
+comment 0 0 1 0 0 3 0 0
+`*
+
+assign 0 0 1 1 0 3 0 0
+`split_str := ' ,\t\n'
+' ,\t\n'
+split_str
+assign 0 0 1 1 0 3 0 0
+`NoUseStr := 'No use'
+'No use'
+NoUseStr
+comment 0 0 1 0 0 3 0 0
+`* 
+
+comment 0 0 1 0 0 3 0 0
+`* ================================================================================
+================================================================================
+comment 0 0 1 0 0 3 0 0
+`* Check argument (OK: 'all' or int or int-array)
+Check argument (OK: 'all' or int or int-array)
+assign 0 0 1 1 0 3 0 0
+`UsingCameraNoParam_All := 'all'
+'all'
+UsingCameraNoParam_All
+if 0 0 1 0 0 3 0 0
+`if (UsingCameraNo # UsingCameraNoParam_All)
+UsingCameraNo # UsingCameraNoParam_All
+for 0 0 3 1 1 3 0 0
+`    for i :=0 to |UsingCameraNo| - 1 by 1
+0
+|UsingCameraNo| - 1
+1
+i
+try 0 0 0 0 2 3 0 0
+`        try
+if 0 0 1 0 3 3 0 0
+`            if (UsingCameraNo[i] % 1 # 0)
+UsingCameraNo[i] % 1 # 0
+throw 0 0 1 0 4 3 0 0
+`                throw ([MY_H_ERR_WIPT2, ''])
+[MY_H_ERR_WIPT2, '']
+endif 0 0 0 0 3 3 24 0
+`            endif
+comment 0 0 1 0 3 3 0 0
+`            * Numeric
+Numeric
+catch 0 0 0 1 2 3 23 0
+`        catch (Exception)
+Exception
+comment 0 0 1 0 3 3 0 0
+`            * Real or strings
+Real or strings
+get_error_text 0 0 1 1 3 1 0 0
+`            get_error_text (MY_H_ERR_WIPT2, strs)
+MY_H_ERR_WIPT2
+strs
+throw 0 0 1 0 3 3 0 0
+`            throw ([MY_H_ERR_WIPT2, strs])
+[MY_H_ERR_WIPT2, strs]
+endtry 0 0 0 0 2 3 28 0
+`        endtry
+endfor 0 0 0 0 1 3 22 0
+`    endfor
+endif 0 0 0 0 0 3 21 0
+`endif
+comment 0 0 1 0 0 3 0 0
+`* 
+
+comment 0 0 1 0 0 3 0 0
+`* ================================================================================
+================================================================================
+comment 0 0 1 0 0 3 0 0
+`* Parse
+Parse
+extract_calibration_params 0 0 2 5 0 4 0 0
+`extract_calibration_params (IniFilename, UsingCameraNo, _, DefaultValues, CameraData, CameraDataIndices, CameraNoIndices)
+IniFilename
+UsingCameraNo
+_
+DefaultValues
+CameraData
+CameraDataIndices
+CameraNoIndices
+comment 0 0 1 0 0 3 0 0
+`* 
+
+comment 0 0 1 0 0 3 0 0
+`* ================================================================================
+================================================================================
+comment 0 0 1 0 0 3 0 0
+`* Check camera config file that include UsingCameraNo.
+Check camera config file that include UsingCameraNo.
+if 0 0 1 0 0 3 0 0
+`if (UsingCameraNo # UsingCameraNoParam_All)
+UsingCameraNo # UsingCameraNoParam_All
+for 0 0 3 1 1 3 0 0
+`    for i :=0 to |UsingCameraNo| - 1 by 1
+0
+|UsingCameraNo| - 1
+1
+i
+assign 0 0 1 1 2 3 0 0
+`        is_included := false
+false
+is_included
+for 0 0 3 1 2 3 0 0
+`        for j := 0 to |CameraNoIndices| - 1 by 1
+0
+|CameraNoIndices| - 1
+1
+j
+if 0 0 1 0 3 3 0 0
+`            if (UsingCameraNo[i] = CameraNoIndices[j])
+UsingCameraNo[i] = CameraNoIndices[j]
+assign 0 0 1 1 4 3 0 0
+`                is_included := true
+true
+is_included
+endif 0 0 0 0 3 3 46 0
+`            endif
+endfor 0 0 0 0 2 3 45 0
+`        endfor
+if 0 0 1 0 2 3 0 0
+`        if (not is_included)
+not is_included
+get_error_text 0 0 1 1 3 1 0 0
+`            get_error_text (MY_H_ERR_WIPT2, strs)
+MY_H_ERR_WIPT2
+strs
+throw 0 0 1 0 3 3 0 0
+`            throw ([MY_H_ERR_WIPT2, strs])
+[MY_H_ERR_WIPT2, strs]
+endif 0 0 0 0 2 3 50 0
+`        endif
+endfor 0 0 0 0 1 3 43 0
+`    endfor
+endif 0 0 0 0 0 3 42 0
+`endif
+comment 0 0 1 0 0 3 0 0
+`*
+
+comment 0 0 1 0 0 3 0 0
+`* ================================================================================
+================================================================================
+comment 0 0 1 0 0 3 0 0
+`* Generate default values for set_framegrabber_param()
+Generate default values for set_framegrabber_param()
+assign 0 0 1 1 0 3 0 0
+`SetParamValues := []
+[]
+SetParamValues
+for 0 0 3 1 0 3 0 0
+`for i := 0 to |DefaultValues| - 1 by 2
+0
+|DefaultValues| - 1
+2
+i
+if 0 0 1 0 1 3 0 0
+`    if (DefaultValues[i]{0} = '+')
+DefaultValues[i]{0} = '+'
+assign 0 0 1 1 2 3 0 0
+`        SetParamValues := [ SetParamValues, DefaultValues[i:i+1] ]
+[ SetParamValues, DefaultValues[i:i+1] ]
+SetParamValues
+endif 0 0 0 0 1 3 61 0
+`    endif
+endfor 0 0 0 0 0 3 60 0
+`endfor
+comment 0 0 1 0 0 3 0 0
+`* 
+
+comment 0 0 1 0 0 3 0 0
+`* ================================================================================
+================================================================================
+comment 0 0 1 0 0 3 0 0
+`* Execute open_framegrabber().
+Execute open_framegrabber().
+for 0 0 3 1 0 3 0 0
+`for i := 0 to |CameraDataIndices| - 2 by 1
+0
+|CameraDataIndices| - 2
+1
+i
+wait_seconds 0 0 1 0 1 1 0 0
+`    wait_seconds (0.1)
+0.1
+ifelse 0 0 1 0 1 3 0 0
+`    if (CameraDataIndices[i] <= CameraDataIndices[i+1] - 1)
+CameraDataIndices[i] <= CameraDataIndices[i+1] - 1
+assign 0 0 1 1 2 3 0 0
+`        fg := CameraData[CameraDataIndices[i] : CameraDataIndices[i+1] - 1]
+CameraData[CameraDataIndices[i] : CameraDataIndices[i+1] - 1]
+fg
+else 0 0 0 0 1 3 70 0
+`    else
+assign 0 0 1 1 2 3 0 0
+`        fg := []
+[]
+fg
+endif 0 0 0 0 1 3 72 0
+`    endif
+comment 0 0 1 0 1 3 0 0
+`    *
+
+if 0 0 1 0 1 3 0 0
+`    if ( fg = [] )
+fg = []
+comment 0 0 1 0 2 3 0 0
+`        * No device open (in case of <framegrabber> is empty)
+No device open (in case of <framegrabber> is empty)
+assign 0 0 1 1 2 3 0 0
+`        FGHandles := [FGHandles, 0]
+[FGHandles, 0]
+FGHandles
+assign 0 0 1 1 2 3 0 0
+`        FGStateStrings := [FGStateStrings, NoUseStr]
+[FGStateStrings, NoUseStr]
+FGStateStrings
+elseif 0 0 1 0 1 3 76 0
+`    elseif ( (find(fg, 'Enabled') > -1) and (fg[find(fg, 'Enabled') + 1] # 'true') )
+(find(fg, 'Enabled') > -1) and (fg[find(fg, 'Enabled') + 1] # 'true')
+comment 0 0 1 0 2 3 0 0
+`        * No device open (for old version format..."Enable = true/false")
+No device open (for old version format..."Enable = true/false")
+assign 0 0 1 1 2 3 0 0
+`        FGHandles := [FGHandles, 0]
+[FGHandles, 0]
+FGHandles
+assign 0 0 1 1 2 3 0 0
+`        FGStateStrings := [FGStateStrings, NoUseStr]
+[FGStateStrings, NoUseStr]
+FGStateStrings
+else 0 0 0 0 1 3 80 0
+`    else
+comment 0 0 1 0 2 3 0 0
+`        * Device open ------------------------------
+Device open ------------------------------
+comment 0 0 1 0 2 3 0 0
+`        * 
+
+assign 0 0 1 1 2 3 0 0
+`        strs := 'Name'
+'Name'
+strs
+ifelse 0 0 1 0 2 3 0 0
+`        if (find(fg, strs) < 0)
+find(fg, strs) < 0
+assign 0 0 1 1 3 3 0 0
+`            p_Name := DefaultValues[find(DefaultValues, strs) + 1]
+DefaultValues[find(DefaultValues, strs) + 1]
+p_Name
+else 0 0 0 0 2 3 88 0
+`        else
+assign 0 0 1 1 3 3 0 0
+`            p_Name := fg[find(fg, strs) + 1]
+fg[find(fg, strs) + 1]
+p_Name
+endif 0 0 0 0 2 3 90 0
+`        endif
+comment 0 0 1 0 2 3 0 0
+`        * 
+
+assign 0 0 1 1 2 3 0 0
+`        strs := 'HorizontalResolution'
+'HorizontalResolution'
+strs
+ifelse 0 0 1 0 2 3 0 0
+`        if (find(fg, strs) < 0)
+find(fg, strs) < 0
+assign 0 0 1 1 3 3 0 0
+`            p_HRes := number(DefaultValues[find(DefaultValues, strs) + 1])
+number(DefaultValues[find(DefaultValues, strs) + 1])
+p_HRes
+else 0 0 0 0 2 3 95 0
+`        else
+assign 0 0 1 1 3 3 0 0
+`            p_HRes := number(fg[find(fg, strs) + 1])
+number(fg[find(fg, strs) + 1])
+p_HRes
+endif 0 0 0 0 2 3 97 0
+`        endif
+comment 0 0 1 0 2 3 0 0
+`        * 
+
+assign 0 0 1 1 2 3 0 0
+`        strs := 'VerticalResolution'
+'VerticalResolution'
+strs
+ifelse 0 0 1 0 2 3 0 0
+`        if (find(fg, strs) < 0)
+find(fg, strs) < 0
+assign 0 0 1 1 3 3 0 0
+`            p_VRes := number(DefaultValues[find(DefaultValues, strs) + 1])
+number(DefaultValues[find(DefaultValues, strs) + 1])
+p_VRes
+else 0 0 0 0 2 3 102 0
+`        else
+assign 0 0 1 1 3 3 0 0
+`            p_VRes := number(fg[find(fg, strs) + 1])
+number(fg[find(fg, strs) + 1])
+p_VRes
+endif 0 0 0 0 2 3 104 0
+`        endif
+comment 0 0 1 0 2 3 0 0
+`        * 
+
+assign 0 0 1 1 2 3 0 0
+`        strs := 'ImageWidth'
+'ImageWidth'
+strs
+ifelse 0 0 1 0 2 3 0 0
+`        if (find(fg, strs) < 0)
+find(fg, strs) < 0
+assign 0 0 1 1 3 3 0 0
+`            p_ImgW := number(DefaultValues[find(DefaultValues, strs) + 1])
+number(DefaultValues[find(DefaultValues, strs) + 1])
+p_ImgW
+else 0 0 0 0 2 3 109 0
+`        else
+assign 0 0 1 1 3 3 0 0
+`            p_ImgW := number(fg[find(fg, strs) + 1])
+number(fg[find(fg, strs) + 1])
+p_ImgW
+endif 0 0 0 0 2 3 111 0
+`        endif
+comment 0 0 1 0 2 3 0 0
+`        * 
+
+assign 0 0 1 1 2 3 0 0
+`        strs := 'ImageHeight'
+'ImageHeight'
+strs
+ifelse 0 0 1 0 2 3 0 0
+`        if (find(fg, strs) < 0)
+find(fg, strs) < 0
+assign 0 0 1 1 3 3 0 0
+`            p_ImgH := number(DefaultValues[find(DefaultValues, strs) + 1])
+number(DefaultValues[find(DefaultValues, strs) + 1])
+p_ImgH
+else 0 0 0 0 2 3 116 0
+`        else
+assign 0 0 1 1 3 3 0 0
+`            p_ImgH := number(fg[find(fg, strs) + 1])
+number(fg[find(fg, strs) + 1])
+p_ImgH
+endif 0 0 0 0 2 3 118 0
+`        endif
+comment 0 0 1 0 2 3 0 0
+`        * 
+
+assign 0 0 1 1 2 3 0 0
+`        strs := 'StartRow'
+'StartRow'
+strs
+ifelse 0 0 1 0 2 3 0 0
+`        if (find(fg, strs) < 0)
+find(fg, strs) < 0
+assign 0 0 1 1 3 3 0 0
+`            p_SRow := number(DefaultValues[find(DefaultValues, strs) + 1])
+number(DefaultValues[find(DefaultValues, strs) + 1])
+p_SRow
+else 0 0 0 0 2 3 123 0
+`        else
+assign 0 0 1 1 3 3 0 0
+`            p_SRow := number(fg[find(fg, strs) + 1])
+number(fg[find(fg, strs) + 1])
+p_SRow
+endif 0 0 0 0 2 3 125 0
+`        endif
+comment 0 0 1 0 2 3 0 0
+`        * 
+
+assign 0 0 1 1 2 3 0 0
+`        strs := 'StartColumn'
+'StartColumn'
+strs
+ifelse 0 0 1 0 2 3 0 0
+`        if (find(fg, strs) < 0)
+find(fg, strs) < 0
+assign 0 0 1 1 3 3 0 0
+`            p_SCol := number(DefaultValues[find(DefaultValues, strs) + 1])
+number(DefaultValues[find(DefaultValues, strs) + 1])
+p_SCol
+else 0 0 0 0 2 3 130 0
+`        else
+assign 0 0 1 1 3 3 0 0
+`            p_SCol := number(fg[find(fg, strs) + 1])
+number(fg[find(fg, strs) + 1])
+p_SCol
+endif 0 0 0 0 2 3 132 0
+`        endif
+comment 0 0 1 0 2 3 0 0
+`        * 
+
+assign 0 0 1 1 2 3 0 0
+`        strs := 'Field'
+'Field'
+strs
+ifelse 0 0 1 0 2 3 0 0
+`        if (find(fg, strs) < 0)
+find(fg, strs) < 0
+assign 0 0 1 1 3 3 0 0
+`            p_Field := DefaultValues[find(DefaultValues, strs) + 1]
+DefaultValues[find(DefaultValues, strs) + 1]
+p_Field
+else 0 0 0 0 2 3 137 0
+`        else
+assign 0 0 1 1 3 3 0 0
+`            p_Field := fg[find(fg, strs) + 1]
+fg[find(fg, strs) + 1]
+p_Field
+endif 0 0 0 0 2 3 139 0
+`        endif
+comment 0 0 1 0 2 3 0 0
+`        * 
+
+assign 0 0 1 1 2 3 0 0
+`        strs := 'BitsPerChannel'
+'BitsPerChannel'
+strs
+ifelse 0 0 1 0 2 3 0 0
+`        if (find(fg, strs) < 0)
+find(fg, strs) < 0
+assign 0 0 1 1 3 3 0 0
+`            p_BitsPerCh := number(DefaultValues[find(DefaultValues, strs) + 1])
+number(DefaultValues[find(DefaultValues, strs) + 1])
+p_BitsPerCh
+else 0 0 0 0 2 3 144 0
+`        else
+assign 0 0 1 1 3 3 0 0
+`            p_BitsPerCh := number(fg[find(fg, strs) + 1])
+number(fg[find(fg, strs) + 1])
+p_BitsPerCh
+endif 0 0 0 0 2 3 146 0
+`        endif
+comment 0 0 1 0 2 3 0 0
+`        * 
+
+assign 0 0 1 1 2 3 0 0
+`        strs := 'ColorSpace'
+'ColorSpace'
+strs
+ifelse 0 0 1 0 2 3 0 0
+`        if (find(fg, strs) < 0)
+find(fg, strs) < 0
+assign 0 0 1 1 3 3 0 0
+`            p_ColorSpc := DefaultValues[find(DefaultValues, strs) + 1]
+DefaultValues[find(DefaultValues, strs) + 1]
+p_ColorSpc
+else 0 0 0 0 2 3 151 0
+`        else
+assign 0 0 1 1 3 3 0 0
+`            p_ColorSpc := fg[find(fg, strs) + 1]
+fg[find(fg, strs) + 1]
+p_ColorSpc
+endif 0 0 0 0 2 3 153 0
+`        endif
+comment 0 0 1 0 2 3 0 0
+`        * 
+
+assign 0 0 1 1 2 3 0 0
+`        strs := 'ExternalTrigger'
+'ExternalTrigger'
+strs
+ifelse 0 0 1 0 2 3 0 0
+`        if (find(fg, strs) < 0)
+find(fg, strs) < 0
+assign 0 0 1 1 3 3 0 0
+`            p_ExtTrig := DefaultValues[find(DefaultValues, strs) + 1]
+DefaultValues[find(DefaultValues, strs) + 1]
+p_ExtTrig
+else 0 0 0 0 2 3 158 0
+`        else
+assign 0 0 1 1 3 3 0 0
+`            p_ExtTrig := fg[find(fg, strs) + 1]
+fg[find(fg, strs) + 1]
+p_ExtTrig
+endif 0 0 0 0 2 3 160 0
+`        endif
+comment 0 0 1 0 2 3 0 0
+`        * 
+
+assign 0 0 1 1 2 3 0 0
+`        strs := 'CameraType'
+'CameraType'
+strs
+ifelse 0 0 1 0 2 3 0 0
+`        if (find(fg, strs) < 0)
+find(fg, strs) < 0
+assign 0 0 1 1 3 3 0 0
+`            p_CamType := DefaultValues[find(DefaultValues, strs) + 1]
+DefaultValues[find(DefaultValues, strs) + 1]
+p_CamType
+else 0 0 0 0 2 3 165 0
+`        else
+assign 0 0 1 1 3 3 0 0
+`            p_CamType := fg[find(fg, strs) + 1]
+fg[find(fg, strs) + 1]
+p_CamType
+endif 0 0 0 0 2 3 167 0
+`        endif
+comment 0 0 1 0 2 3 0 0
+`        * 
+
+assign 0 0 1 1 2 3 0 0
+`        strs := 'Device'
+'Device'
+strs
+ifelse 0 0 1 0 2 3 0 0
+`        if (find(fg, strs) < 0)
+find(fg, strs) < 0
+assign 0 0 1 1 3 3 0 0
+`            p_Device := DefaultValues[find(DefaultValues, strs) + 1]
+DefaultValues[find(DefaultValues, strs) + 1]
+p_Device
+else 0 0 0 0 2 3 172 0
+`        else
+assign 0 0 1 1 3 3 0 0
+`            p_Device := fg[find(fg, strs) + 1]
+fg[find(fg, strs) + 1]
+p_Device
+endif 0 0 0 0 2 3 174 0
+`        endif
+comment 0 0 1 0 2 3 0 0
+`        * 
+
+assign 0 0 1 1 2 3 0 0
+`        strs := 'Port'
+'Port'
+strs
+ifelse 0 0 1 0 2 3 0 0
+`        if (find(fg, strs) < 0)
+find(fg, strs) < 0
+assign 0 0 1 1 3 3 0 0
+`            p_Port := number(DefaultValues[find(DefaultValues, strs) + 1])
+number(DefaultValues[find(DefaultValues, strs) + 1])
+p_Port
+else 0 0 0 0 2 3 179 0
+`        else
+assign 0 0 1 1 3 3 0 0
+`            p_Port := number(fg[find(fg, strs) + 1])
+number(fg[find(fg, strs) + 1])
+p_Port
+endif 0 0 0 0 2 3 181 0
+`        endif
+comment 0 0 1 0 2 3 0 0
+`        * 
+
+assign 0 0 1 1 2 3 0 0
+`        strs := 'LineIn'
+'LineIn'
+strs
+ifelse 0 0 1 0 2 3 0 0
+`        if (find(fg, strs) < 0)
+find(fg, strs) < 0
+assign 0 0 1 1 3 3 0 0
+`            p_LineIn := number(DefaultValues[find(DefaultValues, strs) + 1])
+number(DefaultValues[find(DefaultValues, strs) + 1])
+p_LineIn
+else 0 0 0 0 2 3 186 0
+`        else
+assign 0 0 1 1 3 3 0 0
+`            p_LineIn := number(fg[find(fg, strs) + 1])
+number(fg[find(fg, strs) + 1])
+p_LineIn
+endif 0 0 0 0 2 3 188 0
+`        endif
+comment 0 0 1 0 2 3 0 0
+`        * 
+
+try 0 0 0 0 2 3 0 0
+`        try
+open_framegrabber 0 0 16 1 3 1 0 0
+`            open_framegrabber (p_Name, p_HRes, p_VRes, p_ImgW, p_ImgH, p_SRow, p_SCol, p_Field, p_BitsPerCh, p_ColorSpc, -1, p_ExtTrig, p_CamType, p_Device, p_Port, p_LineIn, AcqHandle)
+p_Name
+p_HRes
+p_VRes
+p_ImgW
+p_ImgH
+p_SRow
+p_SCol
+p_Field
+p_BitsPerCh
+p_ColorSpc
+-1
+p_ExtTrig
+p_CamType
+p_Device
+p_Port
+p_LineIn
+AcqHandle
+catch 0 0 0 1 2 3 192 0
+`        catch (Exception)
+Exception
+assign 0 0 1 1 3 3 0 0
+`            FGHandles := [FGHandles, -Exception[0]]
+[FGHandles, -Exception[0]]
+FGHandles
+get_error_text 0 0 1 1 3 1 0 0
+`            get_error_text (Exception[0], errStr)
+Exception[0]
+errStr
+assign 0 0 1 1 3 3 0 0
+`            FGStateStrings := [FGStateStrings, errStr]
+[FGStateStrings, errStr]
+FGStateStrings
+continue 0 0 0 0 3 3 0 0
+`            continue
+endtry 0 0 0 0 2 3 194 0
+`        endtry
+comment 0 0 1 0 2 3 0 0
+`        * 
+
+assign 0 0 1 1 2 3 0 0
+`        FGHandles := [FGHandles, AcqHandle]
+[FGHandles, AcqHandle]
+FGHandles
+assign 0 0 1 1 2 3 0 0
+`        FGStateStrings := [FGStateStrings, 'OK']
+[FGStateStrings, 'OK']
+FGStateStrings
+endif 0 0 0 0 1 3 84 0
+`    endif
+endfor 0 0 0 0 0 3 68 0
+`endfor
+comment 0 0 1 0 0 3 0 0
+`* 
+
+comment 0 0 1 0 0 3 0 0
+`* ================================================================================
+================================================================================
+comment 0 0 1 0 0 3 0 0
+`* Add/overwrite values of tag <framegrabber> to default values, 
+Add/overwrite values of tag <framegrabber> to default values,
+comment 0 0 1 0 0 3 0 0
+`* excecute set_framegrabber_param().
+excecute set_framegrabber_param().
+comment 0 0 1 0 0 3 0 0
+`* Perform capture as validation, also.
+Perform capture as validation, also.
+for 0 0 3 1 0 3 0 0
+`for i := 0 to |CameraDataIndices| - 2 by 1
+0
+|CameraDataIndices| - 2
+1
+i
+wait_seconds 0 0 1 0 1 1 0 0
+`    wait_seconds (0.02)
+0.02
+assign 0 0 1 1 1 3 0 0
+`    AcqHandle := FGHandles[i]
+FGHandles[i]
+AcqHandle
+ifelse 0 0 1 0 1 3 0 0
+`    if (CameraDataIndices[i] <= CameraDataIndices[i+1] - 1)
+CameraDataIndices[i] <= CameraDataIndices[i+1] - 1
+assign 0 0 1 1 2 3 0 0
+`        fg := CameraData[CameraDataIndices[i] : CameraDataIndices[i+1] - 1]
+CameraData[CameraDataIndices[i] : CameraDataIndices[i+1] - 1]
+fg
+else 0 0 0 0 1 3 213 0
+`    else
+assign 0 0 1 1 2 3 0 0
+`        fg := []
+[]
+fg
+endif 0 0 0 0 1 3 215 0
+`    endif
+comment 0 0 1 0 1 3 0 0
+`    *
+
+if 0 0 1 0 1 3 0 0
+`    if ( fg = [] )
+fg = []
+comment 0 0 1 0 2 3 0 0
+`        * No device open (in case of <framegrabber> is empty)
+No device open (in case of <framegrabber> is empty)
+assign 0 0 1 1 2 3 0 0
+`        FGHandles := [FGHandles, 0]
+[FGHandles, 0]
+FGHandles
+assign 0 0 1 1 2 3 0 0
+`        FGStateStrings := [FGStateStrings, NoUseStr]
+[FGStateStrings, NoUseStr]
+FGStateStrings
+elseif 0 0 1 0 1 3 219 0
+`    elseif ( (find(fg, 'Enabled') > -1) and (fg[find(fg, 'Enabled') + 1] # 'true') )
+(find(fg, 'Enabled') > -1) and (fg[find(fg, 'Enabled') + 1] # 'true')
+comment 0 0 1 0 2 3 0 0
+`        * No device open (for old version format..."Enable = true/false")
+No device open (for old version format..."Enable = true/false")
+continue 0 0 0 0 2 3 0 0
+`        continue
+elseif 0 0 1 0 1 3 223 0
+`    elseif (AcqHandle <= 0)
+AcqHandle <= 0
+comment 0 0 1 0 2 3 0 0
+`        * No device open
+No device open
+continue 0 0 0 0 2 3 0 0
+`        continue
+else 0 0 0 0 1 3 226 0
+`    else
+comment 0 0 1 0 2 3 0 0
+`        * Open device ------------------------------
+Open device ------------------------------
+assign 0 0 1 1 2 3 0 0
+`        SetParamValuesTmp := SetParamValues
+SetParamValues
+SetParamValuesTmp
+for 0 0 3 1 2 3 0 0
+`        for j := 0 to |fg| - 1 by 2
+0
+|fg| - 1
+2
+j
+if 0 0 1 0 3 3 0 0
+`            if (fg[j]{0} = '+')
+fg[j]{0} = '+'
+assign 0 0 1 1 4 3 0 0
+`                idx := find(SetParamValuesTmp, fg[j])
+find(SetParamValuesTmp, fg[j])
+idx
+ifelse 0 0 1 0 4 3 0 0
+`                if (idx < 0)
+idx < 0
+assign 0 0 1 1 5 3 0 0
+`                    SetParamValuesTmp := [SetParamValuesTmp, fg[j:j+1]]
+[SetParamValuesTmp, fg[j:j+1]]
+SetParamValuesTmp
+else 0 0 0 0 4 3 235 0
+`                else
+insert 0 0 3 1 5 3 0 0
+`                    SetParamValuesTmp[idx + 1] := fg[j + 1]
+SetParamValuesTmp
+fg[j + 1]
+idx + 1
+SetParamValuesTmp
+endif 0 0 0 0 4 3 237 0
+`                endif
+endif 0 0 0 0 3 3 233 0
+`            endif
+endfor 0 0 0 0 2 3 232 0
+`        endfor
+assign 0 0 1 1 2 3 0 0
+`        set_param_err := false
+false
+set_param_err
+for 0 0 3 1 2 3 0 0
+`        for j := 0 to |SetParamValuesTmp| - 1 by 2
+0
+|SetParamValuesTmp| - 1
+2
+j
+assign 0 0 1 1 3 3 0 0
+`            fgtmp := SetParamValuesTmp[j : j+1]
+SetParamValuesTmp[j : j+1]
+fgtmp
+assign 0 0 1 1 3 3 0 0
+`            set_type := fgtmp[0]{1 : strlen(fgtmp[0])-1}
+fgtmp[0]{1 : strlen(fgtmp[0])-1}
+set_type
+assign 0 0 1 1 3 3 0 0
+`            set_val := number( fgtmp[1] )
+number( fgtmp[1] )
+set_val
+assign 0 0 1 1 3 3 0 0
+`            k := 0
+0
+k
+while 0 0 1 0 3 3 0 0
+`            while (true)
+true
+try 0 0 0 0 4 3 0 0
+`                try
+comment 0 0 1 0 5 3 0 0
+`                    * Check OK/NG of setting because there is a case of setting failure.
+Check OK/NG of setting because there is a case of setting failure.
+set_framegrabber_param 0 0 3 0 5 1 0 0
+`                    set_framegrabber_param (AcqHandle, set_type, set_val)
+AcqHandle
+set_type
+set_val
+get_framegrabber_param 0 0 2 1 5 1 0 0
+`                    get_framegrabber_param (AcqHandle, set_type, get_val)
+AcqHandle
+set_type
+get_val
+ifelse 0 0 1 0 5 3 0 0
+`                    if (not is_number (set_val))
+not is_number (set_val)
+comment 0 0 1 0 6 3 0 0
+`                        * strings
+strings
+if 0 0 1 0 6 3 0 0
+`                        if (set_val # get_val)
+set_val # get_val
+throw 0 0 1 0 7 3 0 0
+`                            throw ([MY_H_ERR_FGSETPAR, ''])
+[MY_H_ERR_FGSETPAR, '']
+endif 0 0 0 0 6 3 255 0
+`                        endif
+else 0 0 0 0 5 3 253 0
+`                    else
+try 0 0 0 0 6 3 0 0
+`                        try
+assign 0 0 1 1 7 3 0 0
+`                            dummy := (set_val % 1 = 0) + (get_val % 1 = 0)
+(set_val % 1 = 0) + (get_val % 1 = 0)
+dummy
+comment 0 0 1 0 7 3 0 0
+`                            * integer
+integer
+if 0 0 1 0 7 3 0 0
+`                            if (set_val # get_val)
+set_val # get_val
+throw 0 0 1 0 8 3 0 0
+`                                throw ([MY_H_ERR_FGSETPAR, ''])
+[MY_H_ERR_FGSETPAR, '']
+endif 0 0 0 0 7 3 262 0
+`                            endif
+catch 0 0 0 1 6 3 259 0
+`                        catch (Exception)
+Exception
+comment 0 0 1 0 7 3 0 0
+`                            * real
+real
+if 0 0 1 0 7 3 0 0
+`                            if (abs(set_val - get_val) > 1.0)
+abs(set_val - get_val) > 1.0
+throw 0 0 1 0 8 3 0 0
+`                                throw ([MY_H_ERR_FGSETPAR, ''])
+[MY_H_ERR_FGSETPAR, '']
+endif 0 0 0 0 7 3 267 0
+`                            endif
+endtry 0 0 0 0 6 3 265 0
+`                        endtry
+endif 0 0 0 0 5 3 258 0
+`                    endif
+catch 0 0 0 1 4 3 249 0
+`                catch (Exception)
+Exception
+comment 0 0 1 0 5 3 0 0
+`                    *　Retry with wait because failure (until 3 times).
+　Retry with wait because failure (until 3 times).
+if 0 0 1 0 5 3 0 0
+`                    if (k >= 2)
+k >= 2
+insert 0 0 3 1 6 3 0 0
+`                        FGHandles[i] := -Exception[0]
+FGHandles
+-Exception[0]
+i
+FGHandles
+get_error_text 0 0 1 1 6 1 0 0
+`                        get_error_text (Exception[0], errStr)
+Exception[0]
+errStr
+insert 0 0 3 1 6 3 0 0
+`                        FGStateStrings[i] := errStr + ' (' + set_type + ' ' + fgtmp[1] + ')'
+FGStateStrings
+errStr + ' (' + set_type + ' ' + fgtmp[1] + ')'
+i
+FGStateStrings
+assign 0 0 1 1 6 3 0 0
+`                        set_param_err := true
+true
+set_param_err
+close_framegrabber 0 0 1 0 6 1 0 0
+`                        close_framegrabber (AcqHandle)
+AcqHandle
+break 0 0 0 0 6 3 0 0
+`                        break
+endif 0 0 0 0 5 3 274 0
+`                    endif
+wait_seconds 0 0 1 0 5 1 0 0
+`                    wait_seconds (0.1)
+0.1
+assign 0 0 1 1 5 3 0 0
+`                    k := k + 1
+k + 1
+k
+continue 0 0 0 0 5 3 0 0
+`                    continue
+endtry 0 0 0 0 4 3 272 0
+`                endtry
+comment 0 0 1 0 4 3 0 0
+`                * Successful
+Successful
+break 0 0 0 0 4 3 0 0
+`                break
+endwhile 0 0 0 0 3 3 248 0
+`            endwhile
+if 0 0 1 0 3 3 0 0
+`            if (set_param_err)
+set_param_err
+break 0 0 0 0 4 3 0 0
+`                break
+endif 0 0 0 0 3 3 289 0
+`            endif
+endfor 0 0 0 0 2 3 243 0
+`        endfor
+if 0 0 1 0 2 3 0 0
+`        if (set_param_err)
+set_param_err
+continue 0 0 0 0 3 3 0 0
+`            continue
+endif 0 0 0 0 2 3 293 0
+`        endif
+comment 0 0 1 0 2 3 0 0
+`        * 
+
+comment 0 0 1 0 2 3 0 0
+`        * Capturing test
+Capturing test
+comment 0 0 1 0 2 3 0 0
+`        * - Set disable flag in case of failure.
+- Set disable flag in case of failure.
+assign 0 0 1 1 2 3 0 0
+`        MaxFailedCount := 10
+10
+MaxFailedCount
+assign 0 0 1 1 2 3 0 0
+`        failedCount := 0
+0
+failedCount
+assign 0 0 1 1 2 3 0 0
+`        okCount := 0
+0
+okCount
+while 0 0 1 0 2 3 0 0
+`        while (failedCount < MaxFailedCount)
+failedCount < MaxFailedCount
+assign 0 0 1 1 3 3 0 0
+`            Exception := []
+[]
+Exception
+try 0 0 0 0 3 3 0 0
+`            try
+grab_image 0 1 1 0 4 1 0 0
+`                grab_image (Image, AcqHandle)
+Image
+AcqHandle
+catch 0 0 0 1 3 3 304 0
+`            catch (Exception)
+Exception
+wait_seconds 0 0 1 0 4 1 0 0
+`                wait_seconds (0.1)
+0.1
+assign 0 0 1 1 4 3 0 0
+`                failedCount := failedCount + 1
+failedCount + 1
+failedCount
+assign 0 0 1 1 4 3 0 0
+`                okCount := 0
+0
+okCount
+continue 0 0 0 0 4 3 0 0
+`                continue
+endtry 0 0 0 0 3 3 306 0
+`            endtry
+comment 0 0 1 0 3 3 0 0
+`            *
+
+assign 0 0 1 1 3 3 0 0
+`            okCount := okCount + 1
+okCount + 1
+okCount
+if 0 0 1 0 3 3 0 0
+`            if (okCount >= 2)
+okCount >= 2
+break 0 0 0 0 4 3 0 0
+`                break
+endif 0 0 0 0 3 3 314 0
+`            endif
+endwhile 0 0 0 0 2 3 302 0
+`        endwhile
+comment 0 0 1 0 2 3 0 0
+`        *
+
+if 0 0 1 0 2 3 0 0
+`        if (failedCount >= MaxFailedCount)
+failedCount >= MaxFailedCount
+insert 0 0 3 1 3 3 0 0
+`            FGHandles[i] := -Exception[0]
+FGHandles
+-Exception[0]
+i
+FGHandles
+get_error_text 0 0 1 1 3 1 0 0
+`            get_error_text (Exception[0], errStr)
+Exception[0]
+errStr
+insert 0 0 3 1 3 3 0 0
+`            FGStateStrings[i] := errStr
+FGStateStrings
+errStr
+i
+FGStateStrings
+close_framegrabber 0 0 1 0 3 1 0 0
+`            close_framegrabber (AcqHandle)
+AcqHandle
+continue 0 0 0 0 3 3 0 0
+`            continue
+endif 0 0 0 0 2 3 319 0
+`        endif
+endif 0 0 0 0 1 3 229 0
+`    endif
+endfor 0 0 0 0 0 3 210 0
+`endfor
+comment 0 0 1 0 0 3 0 0
+`* 
+
+get_image_pointer1 1 0 0 4 0 1 0 1
+`* get_image_pointer1 (Image, Pointer, Type, Width, Height)
+Image
+Pointer
+Type
+Width
+Height
+comment 0 0 1 0 0 3 0 0
+`* 
+
+comment 0 0 1 0 0 3 0 0
+`* ================================================================================
+================================================================================
+comment 0 0 1 0 0 3 0 0
+`* Sort device handle (& status) corresponded to camera no.
+Sort device handle (& status) corresponded to camera no.
+comment 0 0 1 0 0 3 0 0
+`* - Change to tuple that length is maximum value.
+- Change to tuple that length is maximum value.
+comment 0 0 1 0 0 3 0 0
+`* - Set -1 in case of undefined no.
+- Set -1 in case of undefined no.
+comment 0 0 1 0 0 3 0 0
+`*
+
+comment 0 0 1 0 0 3 0 0
+`* (example)
+(example)
+comment 0 0 1 0 0 3 0 0
+`* <in>
+<in>
+comment 0 0 1 0 0 3 0 0
+`*   FGHandles = [123456789, 0]
+  FGHandles = [123456789, 0]
+comment 0 0 1 0 0 3 0 0
+`*   CameraNoIndices = [3, 1]
+  CameraNoIndices = [3, 1]
+comment 0 0 1 0 0 3 0 0
+`* <out>
+<out>
+comment 0 0 1 0 0 3 0 0
+`*   FGHandles = [0, 0, 0, 123456789]
+  FGHandles = [0, 0, 0, 123456789]
+comment 0 0 1 0 0 3 0 0
+`*
+
+ifelse 0 0 1 0 0 3 0 0
+`if (|CameraNoIndices| > 0)
+|CameraNoIndices| > 0
+tuple_gen_const 0 0 2 1 1 1 0 0
+`    tuple_gen_const (max(CameraNoIndices) + 1, 0, FGHandlesTmp)
+max(CameraNoIndices) + 1
+0
+FGHandlesTmp
+tuple_gen_const 0 0 2 1 1 1 0 0
+`    tuple_gen_const (max(CameraNoIndices) + 1, NoUseStr, FGStateStringsTmp)
+max(CameraNoIndices) + 1
+NoUseStr
+FGStateStringsTmp
+for 0 0 3 1 1 3 0 0
+`    for i := 0 to |CameraNoIndices| - 1 by 1
+0
+|CameraNoIndices| - 1
+1
+i
+insert 0 0 3 1 2 3 0 0
+`        FGHandlesTmp[CameraNoIndices[i]] := FGHandles[i]
+FGHandlesTmp
+FGHandles[i]
+CameraNoIndices[i]
+FGHandlesTmp
+insert 0 0 3 1 2 3 0 0
+`        FGStateStringsTmp[CameraNoIndices[i]] := FGStateStrings[i]
+FGStateStringsTmp
+FGStateStrings[i]
+CameraNoIndices[i]
+FGStateStringsTmp
+endfor 0 0 0 0 1 3 346 0
+`    endfor
+assign 0 0 1 1 1 3 0 0
+`    FGHandles := FGHandlesTmp
+FGHandlesTmp
+FGHandles
+assign 0 0 1 1 1 3 0 0
+`    FGStateStrings := FGStateStringsTmp
+FGStateStringsTmp
+FGStateStrings
+else 0 0 0 0 0 3 343 0
+`else
+comment 0 0 1 0 1 3 0 0
+`    *
+
+endif 0 0 0 0 0 3 352 0
+`endif
+comment 0 0 1 0 0 3 0 0
+`*
+
+comment 0 0 1 0 0 3 0 0
+`* ================================================================================
+================================================================================
+comment 0 0 1 0 0 3 0 0
+`* Throw exception in case that FGHandles is included minus value.
+Throw exception in case that FGHandles is included minus value.
+comment 0 0 1 0 0 3 0 0
+`* - File-parse block error:
+- File-parse block error:
+comment 0 0 1 0 0 3 0 0
+`*   Throw exception.
+  Throw exception.
+comment 0 0 1 0 0 3 0 0
+`* - Othres error (open_framegrabber(), set_framegrabber_param(), grab_image()):
+- Othres error (open_framegrabber(), set_framegrabber_param(), grab_image()):
+comment 0 0 1 0 0 3 0 0
+`*   Set a content of FGHandles corresponded error camera to minus value.
+  Set a content of FGHandles corresponded error camera to minus value.
+comment 0 0 1 0 0 3 0 0
+`*
+
+for 0 0 3 1 0 3 0 1
+`* for i := 0 to |FGHandles| - 1 by 1
+0
+|FGHandles| - 1
+1
+i
+if 0 0 1 0 1 3 0 1
+`*     if (FGHandles[i] < 0)
+FGHandles[i] < 0
+throw 0 0 1 0 2 3 0 1
+`*         throw ([H_MSG_FAIL, 'init_framegrabbers() failure'])
+[H_MSG_FAIL, 'init_framegrabbers() failure']
+endif 0 0 0 0 1 3 364 1
+`*     endif
+endfor 0 0 0 0 0 3 363 1
+`* endfor
+comment 0 0 1 0 0 3 0 0
+`*
+
+return 0 0 0 0 0 3 0 0
+`return ()
+comment 0 0 1 0 0 6 0 0
+* 
+
+<proc_docu id="init_framegrabbers">
+  <abstract lang="en_US">It performs following initialization and validate of frame grabber (camera) in accordance with camera configuration file. 
+
+* Device open (open_framegrabber)
+* Parameter setting and confirmation (set_framegrabber_param / get_framegrabber_param)
+* Image capturing confirmation (grab_image)
+
+Multiple cameras can be initialized at once. 
+
+--------------------------------------------------------
+About response to error during processing:
+
+The action will differ depending on contents of error. 
+
+&lt;Error in config file analysis part&gt;
+ (File opening failure, description error, version number mismatch, etc.)
+* Exception will be thrown.  Nothing will be set in out type parameter FGHandles, FGStateStrings.
+
+&lt;Error in initialization and check part&gt;
+ (Device open, failure in parameter setting and image capturing)
+* Minus value is returned to out type parameter FGHandles.
+* Only corresponding camera is device closed. 
+Fordetail information, see the following explanations.
+
+--------------------------------------------------------
+About parameter UsingCameraNo:
+
+It is utilized whenonly a part of camera is to be used for camera group specified as effective by setting file. 
+
+Camera numbers not specified are regarded as device not in use and set 0 in corresponding number in FGHandles. 
+It is not possible to turn the cameras specified as non-effective in camera configration file to effective by this parameter.
+
+(Examples)
+* In the case to use all cameras specified in parameter IniFilename : 'all'
+* In the case to use camera no. 0 and no. 1 : [0, 1]
+* In the case to use camera no. 3 only : 3
+
+List length and sequence of description in the case of specifying multiple does not matter here. 
+
+--------------------------------------------------------
+About parameter FGHandles , FGStateStrings:
+
+(Format)
+FGHandles = [AcqHandle0, AcqHandle1, ...]
+FGStateStrings = [state of AcqHandle0, state of AcqHandle1, ...]
+ 
+(Sign of each element)
+* – : Device initialization failure (value of HALCON error code with negative sign) 
+* 0 : Device not in use (a camera set as &lt;camera 0*&gt; in camera configration file) or non–defined device number
+* + : Device handle value (device effective) 
+
+(Example)
+FGHandles = [284733936, 0, -5321]
+FGStateStrings = ['OK', 'No use', 'Image acquisition: unsupported parameter (gain 0.1)']
+* In the case of  (effective, not in use, failure) in camera configration file.
+
+--------------------------------------------------------
+About exception:
+
+Exception (H_ERR_WIPT2) will be thrown in the following cases:
+* Other than integer number is included in UsingCameraNo (excluding 'all').
+* UsingCameraNo not described in IniFilename file exists.
+</abstract>
+  <abstract lang="ja_JP">設定ファイルに従い，以下のフレームグラバ （カメラ） の初期化・動作チェックを行います。
+ * デバイスオープン (open_framegrabber)
+ * パラメータ設定・確認 (set_framegrabber_param / get_framegrabber_param)
+ * 撮像確認 (grab_image)
+複数カメラの一括初期化が可能です。
+
+--------------------------------------------------------
+＜処理中のエラー対応＞
+
+エラー内容により動作が異なります。
+
+【 設定ファイル解析部のエラー （ファイルオープン失敗，記述ミス，バージョン番号不適合など） 】
+例外が送出されます。
+out型パラメーター FGHandles, FGStateStrings には何も設定されません。
+
+【 初期化・チェック部のエラー （デバイスオープン，パラメーター設定，撮像の失敗） 】
+* out型パラメーター FGHandles にマイナス値が返されます。
+* 該当カメラのみがデバイスクローズされます。
+詳しくは以下の説明を参照してください。
+
+--------------------------------------------------------
+＜in型パラメーター UsingCameraNo について＞
+設定ファイルで有効と指定されたカメラ群において，一部のカメラのみ使用したい場合に使用します。
+
+指定されなかったカメラ番号については，デバイス未使用と見なされ， FGHandles の該当番号において 0 が設定されます。
+設定ファイルで無効と指定されたカメラを，本パラメーターで有効にすることはできません。
+
+例を示します。
+* パラメーター IniFilename で指定されたカメラを全て使用したい場合 : 'all'
+* カメラno. 0 と no. 1 を使用したい場合 : [0, 1]
+* カメラno. 3 のみ使用したい場合 : 3
+複数指定する場合のリスト長および記述順は問いません。
+
+--------------------------------------------------------
+＜out型パラメーター FGHandles, FGStateStrings について＞
+
+（書式）
+FGHandles = [AcqHandle0, AcqHandle1, ...]
+FGStateStrings = [AcqHandle0 の状況文字列, AcqHandle1 の状況文字列, ...]
+
+（各要素の符号）
+* - : デバイス初期化失敗  （HALCONエラーコードをマイナスにした値）
+* 0 : デバイス未使用  （設定ファイルで &lt;camera 0*&gt; のようにしたカメラ） or 未定義のデバイス番号
+* + : デバイスハンドル値 （デバイス有効）
+
+（例） in型パラメーター IniFilename において （有効, 未使用, 失敗） になるよう ファイルを記述した場合
+FGHandles = [284733936, 0, -5321]
+FGStateStrings = ['OK', 'No use', 'Image acquisition: unsupported parameter (gian 0.1)']
+
+--------------------------------------------------------
+＜例外＞
+
+次の場合に例外（ H_ERR_WIPT2 ）が発生します。
+* UsingCameraNo に整数以外が含まれている （'all' を除く）。
+* IniFilename のファイルに記述されていない UsingCameraNo がある。
+</abstract>
+  <alternatives>
+    <item>open_framegrabber</item>
+    <item>set_framegrabber_param</item>
+  </alternatives>
+  <chapters lang="en_US">
+    <item>Utilities</item>
+  </chapters>
+  <chapters lang="ja_JP">
+    <item>Utilities</item>
+  </chapters>
+  <example lang="en_US">&lt;Example&gt;
+
+* get_nextage_camparam_path() is included in sample_procedures.dev
+* in HALCON folder at destination of NEXTAGE Vision SDK installation.
+get_nextage_camparam_path ('V21', CamParamPath, CalTabPath)
+CameraSettingsFilename := CamParamPath + 'CameraSettings.dat'
+*
+init_framegrabbers (CameraSettingsFilename, 'all', FGHandles, FGStateStrings)
+
+
+
+&lt;Format (example) of camera configration file specified by IniFilename&gt;
+
+# FrameGrabbers and Calibration Setting File
+# 
+# These parameters are used in init_framegrabber() and extract_calibration_params().
+# 
+# NOTE:
+#  - Add an asterisk after the camera number to ignore the camera setting block.
+#     (example) &lt;camera 0*&gt;
+#
+#  - The paramters in &lt;framegrabber&gt; block are used for HALCON operators as follows,
+#    - [ParameterName] (w/o '+')  : used in open_framegrabber() HALCON operater
+#    - +[ParameterName] (with '+'): used in set_framegrabber_param() HALCON operater
+#
+#  - Allowed as split characters in each parameter line are space(' '), comma(',') and tab('\t').
+#  - The region between '#' and end of the line means comment.
+
+&lt;format_ver&gt;
+  0.3
+&lt;/format_ver&gt;
+
+# -----------------------------------------------------------------------
+&lt;camera 0&gt;
+    &lt;framegrabber&gt;
+        Name                  uEye
+        ColorSpace            rgb
+        CameraType            UI145x-C
+    &lt;/framegrabber&gt;
+    
+    &lt;calibration&gt;
+        CaltabFile            caltab_200mm.descr
+        FocalLength           8.0e-3
+        CameraPixelSize       4.2e-6, *
+        ExposureParams        exposure, 1.0 # name, coefficient[ms/raw] (, min[ms], max[ms])
+    &lt;/calibration&gt;
+&lt;/camera&gt;
+
+# -----------------------------------------------------------------------
+&lt;defaults&gt;
+    &lt;framegrabber&gt;
+        Name                  none
+        HorizontalResolution  1
+        VerticalResolution    1
+        ImageWidth            -1
+        ImageHeight           -1
+        StartRow              -1
+        StartColumn           -1
+        Field                 default
+        BitsPerChannel        -1
+        ColorSpace            default
+        ExternalTrigger       default
+        CameraType            default
+        Device                default
+        Port                  -1
+        LineIn                -1
+    &lt;/framegrabber&gt;
+    
+    &lt;calibration&gt; # this brock is invalid. (a written for help comment only)
+        CalTabFile            ***.descr # HALCON Calibration Description Filename.
+        FocalLength           1e-3      # [m]
+        CameraPixelSize       1e-6, *   # [m], order (w, h).  Usable * when w=h.
+        ExposureParams        none      # order (param.name, time coefficient[msec/raw])
+                                        #  or order (param.name, time coefficient[msec/raw],
+                                        #            min[msec], max[msec])
+                                        #  or none
+    &lt;/calibration&gt;
+&lt;/defaults&gt;
+</example>
+  <example lang="ja_JP">＜例＞
+
+* get_nextage_camparam_path() は NEXTAGE Vision SDK インストール先の Halcon フォルダーにある
+* sample_procedures.dev に含まれています。
+get_nextage_camparam_path ('V21', CamParamPath, CalTabPath)
+CameraSettingsFilename := CamParamPath + 'CameraSettings.dat'
+*
+init_framegrabbers (CameraSettingsFilename, 'all', FGHandles, FGStateStrings)
+
+
+＜IniFilename で指定するカメラ設定ファイルの書式（例）＞
+
+# FrameGrabbers and Calibration Setting File
+# 
+# These parameters are used in init_framegrabber() and extract_calibration_params().
+# 
+# NOTE:
+#  - Add an asterisk after the camera number to ignore the camera setting block.
+#     (example) &lt;camera 0*&gt;
+#
+#  - The paramters in &lt;framegrabber&gt; block are used for HALCON operators as follows,
+#    - [ParameterName] (w/o '+')  : used in open_framegrabber() HALCON operater
+#    - +[ParameterName] (with '+'): used in set_framegrabber_param() HALCON operater
+#
+#  - Allowed as split characters in each parameter line are space(' '), comma(',') and tab('\t').
+#  - The region between '#' and end of the line means comment.
+
+&lt;format_ver&gt;
+  0.3
+&lt;/format_ver&gt;
+
+# -----------------------------------------------------------------------
+&lt;camera 0&gt;
+    &lt;framegrabber&gt;
+        Name                  uEye
+        ColorSpace            rgb
+        CameraType            UI145x-C
+    &lt;/framegrabber&gt;
+    
+    &lt;calibration&gt;
+        CaltabFile            caltab_200mm.descr
+        FocalLength           8.0e-3
+        CameraPixelSize       4.2e-6, *
+        ExposureParams        exposure, 1.0 # name, coefficient[ms/raw] (, min[ms], max[ms])
+    &lt;/calibration&gt;
+&lt;/camera&gt;
+
+# -----------------------------------------------------------------------
+&lt;defaults&gt;
+    &lt;framegrabber&gt;
+        Name                  none
+        HorizontalResolution  1
+        VerticalResolution    1
+        ImageWidth            -1
+        ImageHeight           -1
+        StartRow              -1
+        StartColumn           -1
+        Field                 default
+        BitsPerChannel        -1
+        ColorSpace            default
+        ExternalTrigger       default
+        CameraType            default
+        Device                default
+        Port                  -1
+        LineIn                -1
+    &lt;/framegrabber&gt;
+    
+    &lt;calibration&gt; # this brock is invalid. (a written for help comment only)
+        CalTabFile            ***.descr # HALCON Calibration Description Filename.
+        FocalLength           1e-3      # [m]
+        CameraPixelSize       1e-6, *   # [m], order (w, h).  Usable * when w=h.
+        ExposureParams        none      # order (param.name, time coefficient[msec/raw])
+                                        #  or order (param.name, time coefficient[msec/raw],
+                                        #            min[msec], max[msec])
+                                        #  or none
+    &lt;/calibration&gt;
+&lt;/defaults&gt;
+</example>
+  <library lang="en_US">NEXTAGE Vision Procedures</library>
+  <library lang="ja_JP">NEXTAGE Vision Procedures</library>
+  <see_also>
+    <item>open_framegrabber</item>
+    <item>set_framegrabber_param</item>
+    <item>get_framegrabber_param</item>
+    <item>extract_calibration_params</item>
+    <item>get_nextage_camparam_path</item>
+  </see_also>
+  <short lang="en_US">Initialize multiple frame grabbers (cameras).</short>
+  <short lang="ja_JP">複数のフレームグラバ（カメラ）を初期化します。</short>
+  <parameters>
+    <parameter id="FGHandles">
+      <description lang="en_US">Handle list of obtained frame grabber</description>
+      <description lang="ja_JP">取得したフレームグラバのハンドルリスト</description>
+      <mixed_type>false</mixed_type>
+      <multivalue>true</multivalue>
+      <sem_type>framegrabber</sem_type>
+      <type_list>
+        <item>integer</item>
+      </type_list>
+    </parameter>
+    <parameter id="FGStateStrings">
+      <description lang="en_US">State string corresponding to respective elements of FGHandles</description>
+      <description lang="ja_JP">FGHandles の個々の要素に対応する状況文字列</description>
+      <mixed_type>false</mixed_type>
+      <multivalue>optional</multivalue>
+      <sem_type>string</sem_type>
+      <type_list>
+        <item>string</item>
+      </type_list>
+    </parameter>
+    <parameter id="IniFilename">
+      <default_value>CameraSettings.dat</default_value>
+      <description lang="en_US">Camera configration filename</description>
+      <description lang="ja_JP">カメラ設定ファイル名</description>
+      <mixed_type>false</mixed_type>
+      <multivalue>false</multivalue>
+      <sem_type>filename.read</sem_type>
+      <type_list>
+        <item>string</item>
+      </type_list>
+    </parameter>
+    <parameter id="UsingCameraNo">
+      <default_value>'all'</default_value>
+      <description lang="en_US">Camera number to be used (string 'all', integer or integer-array)</description>
+      <description lang="ja_JP">使用したいカメラ番号 （文字列 'all' or 整数 or 整数リスト）</description>
+      <mixed_type>false</mixed_type>
+      <multivalue>optional</multivalue>
+      <sem_type>any</sem_type>
+      <type_list>
+        <item>integer</item>
+        <item>string</item>
+      </type_list>
+      <values>
+        <item>'all'</item>
+        <item>[0,1]</item>
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+      </values>
+    </parameter>
+  </parameters>
+</proc_docu>

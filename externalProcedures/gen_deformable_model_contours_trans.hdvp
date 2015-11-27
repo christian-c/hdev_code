@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.0" halcon_version="10.0.1" cs="375672434">
+<procedure name="gen_deformable_model_contours_trans">
+<interface>
+<oo>
+<par name="ModelContoursTrans"/>
+</oo>
+<ic>
+<par name="ModelID"/>
+<par name="CamParam"/>
+</ic>
+</interface>
+<body>
+<c>* 表示用XLDを生成する</c>
+<c>* </c>
+<l>get_deformable_model_params (ModelID, 'model_row', modelRow)</l>
+<l>get_deformable_model_params (ModelID, 'model_col', modelCol)</l>
+<l>get_deformable_model_params (ModelID, 'model_pose', modelPose)</l>
+<c>* </c>
+<c>* 元を取得する</c>
+<l>get_deformable_model_contours (ModelContours, ModelID, 1)</l>
+<c>* 大抵は細かすぎるため，荒くする（近傍点をまとめる）</c>
+<l>union_adjacent_contours_xld (ModelContours, ModelContours, 10, 1, 'attr_keep')</l>
+<c>* 変換する</c>
+<l>affine_trans_contour_xld (ModelContours, ContoursAffinTrans, [1, 0, modelRow, 0, 1, modelCol])</l>
+<c>* </c>
+<c>* ------------------------- 位置ズレの修正（from MVTec）</c>
+<c>* After new origin was set the model contour is moved</c>
+<l>get_deformable_model_contours (ModelContoursAfter, ModelID, 1)</l>
+<l>get_deformable_model_origin (ModelID, orgRow, orgCol)</l>
+<c>* </c>
+<l>union_adjacent_contours_xld (ModelContoursAfter, ModelContoursAfter, 10, 1, 'attr_keep')</l>
+<l>affine_trans_contour_xld (ModelContoursAfter, ContoursAffinTransAfter, [1, 0, modelRow + orgRow, 0, 1, modelCol + orgCol])</l>
+<l>contour_to_world_plane_xld (ContoursAffinTransAfter, ModelContoursTrans, CamParam, modelPose, 'm')</l>
+<c>* </c>
+<l>return ()</l>
+<c>* </c>
+</body>
+<docu id="gen_deformable_model_contours_trans">
+<abstract lang="ja_JP">モデルIDとカメラパラメータから，モデル輪郭の基準を作成する．</abstract>
+<chapters lang="ja_JP">
+<item>Tools</item>
+</chapters>
+<short lang="ja_JP">モデルIDとカメラパラメータから，モデル輪郭の基準を作成する．</short>
+<parameters>
+<parameter id="CamParam">
+<description lang="ja_JP">カメラパラメータ．</description>
+<multivalue>true</multivalue>
+<sem_type>number</sem_type>
+</parameter>
+<parameter id="ModelContoursTrans">
+<description lang="ja_JP">モデルの輪郭．</description>
+<multivalue>false</multivalue>
+<sem_type>xld_cont</sem_type>
+</parameter>
+<parameter id="ModelID">
+<description lang="ja_JP">モデルID．</description>
+<multivalue>false</multivalue>
+<sem_type>integer</sem_type>
+</parameter>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>

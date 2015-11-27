@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.0" halcon_version="10.0.3" cs="3927086048">
+<procedure name="make_region">
+<interface>
+<io>
+<par name="Image"/>
+<par name="PreviousRegion"/>
+</io>
+<oo>
+<par name="Region"/>
+</oo>
+<ic>
+<par name="WindowHandle"/>
+<par name="ShapeType"/>
+<par name="ZoomFlag"/>
+<par name="OpType"/>
+</ic>
+</interface>
+<body>
+<c>* リセット</c>
+<l>set_draw (WindowHandle, 'margin')</l>
+<l>set_line_width (WindowHandle, 1)</l>
+<c></c>
+<l>count_channels(Image, Channels)</l>
+<c></c>
+<c>* 領域を拡大</c>
+<l>if (ZoomFlag)</l>
+<l>    get_image_size(Image, imgW, imgH)</l>
+<l>    set_color(WindowHandle, 'magenta')</l>
+<l>    draw_rectangle1(WindowHandle, Row1, Col1, Row2, Col2)</l>
+<l>    gen_rectangle1 (RectRegion, Row1, Col1, Row2, Col2)</l>
+<l>    smallest_rectangle1 (RectRegion, Row1, Col1, Row2, Col2)</l>
+<l>    set_part(WindowHandle, Row1, Col1, Row2, Col2)</l>
+<l>    if (Channels = 1)</l>
+<l>        disp_image(Image, WindowHandle)</l>
+<l>    else</l>
+<l>        disp_color(Image, WindowHandle)</l>
+<l>    endif</l>
+<l>    disp_region(PreviousRegion, WindowHandle)</l>
+<l>endif</l>
+<c></c>
+<c>* 領域を選択</c>
+<l>set_color(WindowHandle, 'red')</l>
+<l>if (ShapeType = 'Circle')</l>
+<l>    draw_circle (WindowHandle, Row, Col, Rad)</l>
+<l>    gen_circle (Region, Row, Col, Rad)</l>
+<l>elseif (ShapeType = 'Ellipse')</l>
+<l>    draw_ellipse (WindowHandle, Row, Col, Phi, Rad1, Rad2)</l>
+<l>    gen_ellipse (Region, Row, Col, Phi, Rad1, Rad2)</l>
+<l>elseif (ShapeType = 'Line')</l>
+<l>    draw_line (WindowHandle, Row1, Col1, Row2, Col2)</l>
+<l>    gen_region_line (Region, Row1, Col1, Row2, Col2)</l>
+<l>elseif (ShapeType = 'Rectangle1')</l>
+<l>    draw_rectangle1 (WindowHandle, Row1, Col1, Row2, Col2)</l>
+<l>    gen_rectangle1 (Region, Row1, Col1, Row2, Col2)</l>
+<l>elseif (ShapeType = 'Rectangle2')</l>
+<l>    draw_rectangle2 (WindowHandle, Row, Col, Phi, Length1, Length2)</l>
+<l>    gen_rectangle2 (Region, Row, Col, Phi, Length1, Length2)</l>
+<l>elseif (ShapeType = 'Polygon')</l>
+<l>    draw_region (Region, WindowHandle)</l>
+<l>else</l>
+<l>    gen_empty_obj(Region)</l>
+<l>endif</l>
+<l>*disp_region (Region, WindowHandle)</l>
+<c></c>
+<c>* 拡大を元に戻す</c>
+<l>if(ZoomFlag)</l>
+<l>    set_part(WindowHandle, 0, 0, imgH, imgW)</l>
+<l>endif</l>
+<c></c>
+<c>* 以前までの領域と結合</c>
+<l>count_obj (PreviousRegion, PRNum)</l>
+<l>select_obj (PreviousRegion, PRSelected, PRNum)</l>
+<l>if (OpType = 'Add')</l>
+<l>    union2(PRSelected, Region, PRSelected)</l>
+<l>    if (PRNum = 1)</l>
+<l>        copy_obj (PRSelected, Region, 1, 1)</l>
+<l>    else</l>
+<l>        copy_obj (PreviousRegion, PreviousRegion, 1, PRNum-1)</l>
+<l>        concat_obj (PreviousRegion, PRSelected, Region)</l>
+<l>    endif</l>
+<l>elseif (OpType = 'Del')</l>
+<l>    difference(PRSelected, Region, PRSelected)</l>
+<l>    if (PRNum = 1)</l>
+<l>        copy_obj (PRSelected, Region, 1, 1)</l>
+<l>    else</l>
+<l>        copy_obj (PreviousRegion, PreviousRegion, 1, PRNum-1)</l>
+<l>        concat_obj (PreviousRegion, PRSelected, Region)</l>
+<l>    endif</l>
+<l>elseif (OpType = 'Concat')</l>
+<l>    concat_obj (PreviousRegion, Region, Region)</l>
+<l>else</l>
+<c>    *</c>
+<l>endif</l>
+<c></c>
+<l>clear_window(WindowHandle)</l>
+<l>if(Channels = 1)</l>
+<l>    disp_image(Image, WindowHandle)</l>
+<l>else</l>
+<l>    disp_color(Image, WindowHandle)</l>
+<l>endif</l>
+<l>disp_region(Region, WindowHandle)</l>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="make_region">
+<abstract lang="ja_JP">形状を指定し，領域をインタラクティブに作成する．
+
+また入力領域に対して，作成した領域を追加するか，削除するか，連結するかを選択できる．</abstract>
+<short lang="ja_JP">インタラクティブに領域を指定する．</short>
+<parameters>
+<parameter id="Image">
+<description lang="ja_JP">入力画像．</description>
+<multichannel>optional</multichannel>
+<multivalue>false</multivalue>
+<sem_type>image</sem_type>
+<type_list>
+<item>int2</item>
+<item>int4</item>
+<item>int8</item>
+</type_list>
+</parameter>
+<parameter id="OpType">
+<description lang="ja_JP">PreviousRegionに対して，インタラクティブに指定した領域を「追加する」か，「削除する」か，「連結する」かを選択するフラグ．</description>
+<mixed_type>false</mixed_type>
+<multivalue>false</multivalue>
+<sem_type>string</sem_type>
+<type_list>
+<item>string</item>
+</type_list>
+<value_list>
+<item>'Add'</item>
+<item>'Del'</item>
+<item>'Concat'</item>
+</value_list>
+</parameter>
+<parameter id="PreviousRegion">
+<description lang="ja_JP">入力領域．この領域に対して作成した領域を処理したものが出力領域になる．</description>
+<multivalue>optional</multivalue>
+<sem_type>region</sem_type>
+</parameter>
+<parameter id="Region">
+<description lang="ja_JP">出力領域．</description>
+<multivalue>optional</multivalue>
+<sem_type>region</sem_type>
+</parameter>
+<parameter id="ShapeType">
+<description lang="ja_JP">選択形状．</description>
+<mixed_type>false</mixed_type>
+<multivalue>false</multivalue>
+<sem_type>string</sem_type>
+<type_list>
+<item>string</item>
+</type_list>
+<value_list>
+<item>'Circle'</item>
+<item>'Ellipse'</item>
+<item>'Rectangle1'</item>
+<item>'Rectangle2'</item>
+<item>'Line'</item>
+<item>'Polygon'</item>
+</value_list>
+</parameter>
+<parameter id="WindowHandle">
+<description lang="ja_JP">ウインドウハンドル．</description>
+<mixed_type>false</mixed_type>
+<multivalue>false</multivalue>
+<sem_type>window</sem_type>
+<type_list>
+<item>integer</item>
+</type_list>
+</parameter>
+<parameter id="ZoomFlag">
+<description lang="ja_JP">領域を選択する前に，画像のある部分を拡大するか否かを指定するフラグ．</description>
+<multivalue>false</multivalue>
+<sem_type>integer</sem_type>
+<type_list>
+<item>integer</item>
+</type_list>
+<value_list>
+<item>0</item>
+<item>1</item>
+</value_list>
+</parameter>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>

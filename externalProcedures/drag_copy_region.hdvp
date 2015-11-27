@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.0" halcon_version="10.0.1" cs="4251990342">
+<procedure name="drag_copy_region">
+<interface>
+<io>
+<par name="Image"/>
+<par name="RefRegion"/>
+</io>
+<oo>
+<par name="OutRegion"/>
+</oo>
+<ic>
+<par name="WindowHandle"/>
+</ic>
+</interface>
+<body>
+<c>*囲った領域は枠だけ表示</c>
+<l>set_draw(WindowHandle, 'margin')</l>
+<c></c>
+<c>*領域を拡大</c>
+<l>get_image_size(Image, imgW, imgH)</l>
+<l>set_color(WindowHandle, 'magenta')</l>
+<l>draw_rectangle1(WindowHandle, Row1, Col1, Row2, Col2)</l>
+<l>gen_rectangle1 (RectRegion, Row1, Col1, Row2, Col2)</l>
+<l>smallest_rectangle1 (RectRegion, Row1, Col1, Row2, Col2)</l>
+<l>set_part(WindowHandle, Row1, Col1, Row2, Col2)</l>
+<c></c>
+<l>count_channels(Image, Channels)</l>
+<l>if (Channels = 1)</l>
+<l>    disp_image(Image, WindowHandle)</l>
+<l>else</l>
+<l>    disp_color(Image, WindowHandle)</l>
+<l>endif</l>
+<c></c>
+<l>copy_obj(RefRegion, OutRegions, 1, -1)</l>
+<c></c>
+<l>drag_region1(RefRegion, OutRegion, WindowHandle)</l>
+<l>*concat_obj(OutRegions, DstRegion, OutRegions)</l>
+<c></c>
+<c>*拡大を元に戻す</c>
+<l>set_part(WindowHandle, 0, 0, imgH, imgW)</l>
+<c></c>
+<l>clear_window(WindowHandle)</l>
+<l>if(Channels = 1)</l>
+<l>    disp_image(Image, WindowHandle)</l>
+<l>else</l>
+<l>    disp_color(Image, WindowHandle)</l>
+<l>endif</l>
+<l>disp_region(OutRegion, WindowHandle)</l>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="drag_copy_region">
+<abstract lang="ja_JP">基準となる領域を，インタラクティブにコピーする．</abstract>
+<short lang="ja_JP">領域をインタラクティブにコピーする．</short>
+<parameters>
+<parameter id="Image">
+<description lang="ja_JP">入力画像．</description>
+<multivalue>false</multivalue>
+<sem_type>image</sem_type>
+<type_list>
+<item>int2</item>
+<item>int4</item>
+<item>int8</item>
+</type_list>
+</parameter>
+<parameter id="OutRegion">
+<description lang="ja_JP">出力される，コピー後の領域．</description>
+<multivalue>optional</multivalue>
+<sem_type>region</sem_type>
+</parameter>
+<parameter id="RefRegion">
+<description lang="ja_JP">単一スロット領域と有無判定領域を表す「基準スロット領域」．</description>
+<multivalue>optional</multivalue>
+<sem_type>region</sem_type>
+</parameter>
+<parameter id="WindowHandle">
+<description lang="ja_JP">NvlViewRoiControlのウインドウハンドル．</description>
+<multivalue>false</multivalue>
+<sem_type>integer</sem_type>
+</parameter>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>

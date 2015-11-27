@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.0" halcon_version="10.0.1" cs="538107741">
+<procedure name="gen_contour_for_find_planar_calib_deformable">
+<interface>
+<io>
+<par name="ModelContoursTrans"/>
+</io>
+<oo>
+<par name="FoundContours"/>
+</oo>
+<ic>
+<par name="ObjPoseInCam"/>
+<par name="CamParam"/>
+<par name="ModelID"/>
+</ic>
+</interface>
+<body>
+<l>if (|ObjPoseInCam| = 7)</l>
+<l>    pose_to_hom_mat3d (ObjPoseInCam, cam_H_work)</l>
+<l>elseif (|ObjPoseInCam| = 12)</l>
+<l>    cam_H_work := ObjPoseInCam</l>
+<l>else</l>
+<l>    H_ERR_WIPT1 := 1201</l>
+<l>    get_error_text (H_ERR_WIPT1, msg)</l>
+<l>    throw ([H_ERR_WIPT1, msg])</l>
+<l>endif</l>
+<c>* </c>
+<c>* ContoursAffinTrans and ContoursAffinTransAfter are identical の準備</c>
+<l>get_deformable_model_params (ModelID, 'model_row', modelRow)</l>
+<l>get_deformable_model_params (ModelID, 'model_col', modelCol)</l>
+<l>get_deformable_model_params (ModelID, 'model_pose', modelPose)</l>
+<l>get_deformable_model_origin (ModelID, orgRow, orgCol)</l>
+<c>* </c>
+<c>* 重心の十字マークを生成</c>
+<l>image_points_to_world_plane (CamParam, modelPose, modelRow - orgRow, modelCol - orgCol, 'm', X, Y)</l>
+<l>affine_trans_point_3d (cam_H_work, X, Y, 0, Xc, Yc, Zc)</l>
+<l>project_3d_point (Xc, Yc, Zc, CamParam, R, C)</l>
+<l>crossSize := CamParam[|CamParam| - 1] * 0.04</l>
+<l>gen_cross_contour_xld (Cross, R, C, crossSize, rad(0))</l>
+<c></c>
+<c>* ContoursAffinTrans and ContoursAffinTransAfter are identical</c>
+<l>image_points_to_world_plane (CamParam, modelPose, modelRow + orgRow, modelCol + orgCol, 'm', X, Y)</l>
+<l>hom_mat3d_translate_local (cam_H_work, -X[0], -Y[0], 0, cam_H_work)</l>
+<c>* </c>
+<l>count_obj (ModelContoursTrans, NumberContour)</l>
+<l>* gen_empty_obj (FoundContours)</l>
+<l>copy_obj (Cross, FoundContours, 1, 1)</l>
+<c>* </c>
+<l>for j := 1 to NumberContour by 1</l>
+<l>    select_obj (ModelContoursTrans, ObjectSelected, j)</l>
+<l>    get_contour_xld (ObjectSelected, Y, X)</l>
+<l>    Z := gen_tuple_const(|X|, 0.0)</l>
+<c>    * Transform the metric model into the world coordinate system.</c>
+<l>    affine_trans_point_3d (cam_H_work, X, Y, Z, Xc, Yc, Zc)</l>
+<c>    * Project model from 3D world coordinate system into the camera.</c>
+<l>    project_3d_point (Xc, Yc, Zc, CamParam, R, C)</l>
+<l>    gen_contour_polygon_xld (ModelWorld, R, C)</l>
+<l>    concat_obj (FoundContours, ModelWorld, FoundContours)</l>
+<l>endfor</l>
+<c>* </c>
+<l>return ()</l>
+</body>
+<docu id="gen_contour_for_find_planar_calib_deformable">
+<parameters>
+<parameter id="CamParam"/>
+<parameter id="FoundContours"/>
+<parameter id="ModelContoursTrans"/>
+<parameter id="ModelID"/>
+<parameter id="ObjPoseInCam"/>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>

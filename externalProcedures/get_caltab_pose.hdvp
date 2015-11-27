@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.0" halcon_version="10.0.1" cs="3440694907">
+<procedure name="get_caltab_pose">
+<interface>
+<io>
+<par name="MappedImage"/>
+</io>
+<oo>
+<par name="CaltabRegion"/>
+</oo>
+<ic>
+<par name="CaltabFilename"/>
+<par name="CamParam"/>
+<par name="CaltabThickness"/>
+</ic>
+<oc>
+<par name="CaltabPose"/>
+</oc>
+</interface>
+<body>
+<c></c>
+<l>try</l>
+<l>    find_caltab_auto_param (MappedImage, CaltabRegion, CaltabFilename, ErrorNo)</l>
+<l>*     find_caltab (MappedImage, CaltabRegion, CaltabFilename, 3, 112, 5)</l>
+<l>catch (Exception)</l>
+<l>    H_ERR_CAL_RECPF := 8403</l>
+<l>    if (Exception[0] = H_ERR_CAL_RECPF)</l>
+<l>        throw (Exception)</l>
+<l>    endif</l>
+<l>    gen_empty_obj (CaltabRegion)</l>
+<l>endtry</l>
+<c></c>
+<l>try</l>
+<l>    ThreshParam := [128, 10, 18]</l>
+<l>    Alpha := 0.5</l>
+<l>    MinContLength := 15</l>
+<l>    MaxDiamMarks := 100</l>
+<l>    find_marks_and_pose (MappedImage, CaltabRegion, CaltabFilename, CamParam, ThreshParam[0], ThreshParam[1], ThreshParam[2], Alpha, MinContLength, MaxDiamMarks, rows, cols, CaltabPose)</l>
+<c>    * Camera calibration for high accuracy.</c>
+<l>    *camera_calibration (X, Y, Z, rows, cols, CamParam, CalTabPose, 'pose', _, CalTabPose, Errors)</l>
+<l>catch (Exception)</l>
+<l>    H_ERR_CAL_WIMSZ := 8428</l>
+<l>    if (Exception[0] = H_ERR_CAL_WIMSZ)</l>
+<l>        get_error_text (H_ERR_CAL_WIMSZ, msg)</l>
+<l>        throw ([H_ERR_CAL_WIMSZ, msg])</l>
+<l>    endif</l>
+<l>endtry</l>
+<c></c>
+<c>* CalTabの厚み分，原点を奥(Z+）方向に移動させる．</c>
+<l>set_origin_pose (CaltabPose, 0, 0, CaltabThickness, CaltabPose)</l>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="get_caltab_pose">
+<abstract lang="ja_JP">入力画像からCaltabを発見し，その領域と位置・姿勢を取得する．</abstract>
+<short lang="ja_JP">認識パラメータを自動調整して，Caltab（キャリブレーションプレート）を検出する．</short>
+<parameters>
+<parameter id="CaltabFilename">
+<description lang="ja_JP">Caltab定義ファイル名．</description>
+<file_ext>
+<item>descr</item>
+</file_ext>
+<mixed_type>false</mixed_type>
+<multivalue>false</multivalue>
+<sem_type>filename.read</sem_type>
+<type_list>
+<item>string</item>
+</type_list>
+</parameter>
+<parameter id="CaltabPose">
+<description lang="ja_JP">Caltabの位置姿勢．カメラ座標系基準．</description>
+<mixed_type>optional</mixed_type>
+<multivalue>true</multivalue>
+<sem_type>pose</sem_type>
+</parameter>
+<parameter id="CaltabRegion">
+<description lang="ja_JP">検出されたCaltab領域．検出に失敗した場合，画像全体を表す領域が出力される．</description>
+<multivalue>false</multivalue>
+<sem_type>region</sem_type>
+</parameter>
+<parameter id="CaltabThickness">
+<description lang="ja_JP">Caltabの厚み[m]．</description>
+<mixed_type>false</mixed_type>
+<multivalue>false</multivalue>
+<sem_type>real</sem_type>
+<type_list>
+<item>real</item>
+</type_list>
+</parameter>
+<parameter id="CamParam">
+<description lang="ja_JP">カメラパラメータ．</description>
+<mixed_type>optional</mixed_type>
+<multivalue>true</multivalue>
+<sem_type>number</sem_type>
+</parameter>
+<parameter id="MappedImage">
+<description lang="ja_JP">Caltabが写された生画像．生画像は，歪み補正(および平行化)がなされる前の，カメラから取得したままの画像を意味する．</description>
+<multichannel>optional</multichannel>
+<multivalue>false</multivalue>
+<sem_type>image</sem_type>
+<type_list>
+<item>int2</item>
+<item>int4</item>
+<item>int8</item>
+</type_list>
+</parameter>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>

@@ -1,0 +1,1054 @@
+2 6
+1011061853
+extract_calibration_params 0 0 2 5
+カメラ設定ファイルからキャリブレーション用パラメーターを抽出します。
+Utilities
+IniFilename tuple filename
+InitFg_UsingCameraNo tuple any
+CalibrationParams tuple any
+InitFg_DefaultValues tuple any
+InitFg_CameraData tuple any
+InitFg_CameraDataIndices tuple any
+InitFg_CameraNoIndices tuple any
+0
+266
+comment 0 0 1 0 0 3 0 0
+* ///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+comment 0 0 1 0 0 3 0 0
+* 
+
+comment 0 0 1 0 0 3 0 0
+`* Extract calibration parameters from camera configration file.
+Extract calibration parameters from camera configration file.
+comment 0 0 1 0 0 3 0 0
+* 
+
+comment 0 0 1 0 0 3 0 0
+`* Usage: Reffer to the HDevelop online help.
+Usage: Reffer to the HDevelop online help.
+comment 0 0 1 0 0 3 0 0
+`* 
+
+comment 0 0 1 0 0 3 0 0
+* ///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+comment 0 0 1 0 0 3 0 1
+* 
+
+assign 0 0 1 1 0 3 0 0
+`FileFormatVersions := ['0.3', '0.2']
+['0.3', '0.2']
+FileFormatVersions
+comment 0 0 1 0 0 3 0 0
+`*
+
+comment 0 0 1 0 0 3 0 0
+`* Range of camera no. (min, max)
+Range of camera no. (min, max)
+assign 0 0 1 1 0 3 0 0
+`EnableCameraNoList := [0, 99]
+[0, 99]
+EnableCameraNoList
+comment 0 0 1 0 0 3 0 0
+`* 
+
+assign 0 0 1 1 0 3 0 0
+`FGHandles := []
+[]
+FGHandles
+assign 0 0 1 1 0 3 0 0
+`CalibrationParams := []
+[]
+CalibrationParams
+comment 0 0 1 0 0 3 0 0
+`*
+
+assign 0 0 1 1 0 3 0 1
+`* MY_H_ERR_FGSETPAR := 5329
+5329
+MY_H_ERR_FGSETPAR
+assign 0 0 1 1 0 3 0 0
+`MY_H_ERR_WIPT2 := 1202
+1202
+MY_H_ERR_WIPT2
+assign 0 0 1 1 0 3 0 1
+`* KVL_WRONG_INIFILE_DESCR := 0x8001
+0x8001
+KVL_WRONG_INIFILE_DESCR
+assign 0 0 1 1 0 3 0 0
+`KVL_WRONG_FORMAT_VER := 0x8002
+0x8002
+KVL_WRONG_FORMAT_VER
+comment 0 0 1 0 0 3 0 0
+`*
+
+assign 0 0 1 1 0 3 0 0
+`split_str := ' ,\t\n'
+' ,\t\n'
+split_str
+assign 0 0 1 1 0 3 0 0
+`NoUseStr := 'No use'
+'No use'
+NoUseStr
+assign 0 0 1 1 0 3 0 0
+`CalibParamHeader := 'calib'
+'calib'
+CalibParamHeader
+comment 0 0 1 0 0 3 0 0
+`*
+
+assign 0 0 1 1 0 3 0 0
+`CameraData := []
+[]
+CameraData
+assign 0 0 1 1 0 3 0 0
+`CameraDataIndices := []
+[]
+CameraDataIndices
+assign 0 0 1 1 0 3 0 0
+`CameraNoIndices := []
+[]
+CameraNoIndices
+assign 0 0 1 1 0 3 0 0
+`Blocks := []
+[]
+Blocks
+comment 0 0 1 0 0 3 0 0
+`*
+
+assign 0 0 1 1 0 3 0 0
+`InitFg_UsingCameraNoParam_All := 'all'
+'all'
+InitFg_UsingCameraNoParam_All
+assign 0 0 1 1 0 3 0 0
+`InitFg_DefaultValues := []
+[]
+InitFg_DefaultValues
+assign 0 0 1 1 0 3 0 0
+`InitFg_CameraData := []
+[]
+InitFg_CameraData
+assign 0 0 1 1 0 3 0 0
+`InitFg_CameraDataIndices := []
+[]
+InitFg_CameraDataIndices
+assign 0 0 1 1 0 3 0 0
+`InitFg_CameraNoIndices := []
+[]
+InitFg_CameraNoIndices
+comment 0 0 1 0 0 3 0 0
+`* 
+
+comment 0 0 1 0 0 3 0 0
+`* ================================================================================
+================================================================================
+comment 0 0 1 0 0 3 0 0
+`* Check specified camera no. is valid / invalid.
+Check specified camera no. is valid / invalid.
+if 0 0 1 0 0 3 0 0
+`if (InitFg_UsingCameraNo # InitFg_UsingCameraNoParam_All)
+InitFg_UsingCameraNo # InitFg_UsingCameraNoParam_All
+for 0 0 3 1 1 3 0 0
+`    for i :=0 to |InitFg_UsingCameraNo| - 1 by 1
+0
+|InitFg_UsingCameraNo| - 1
+1
+i
+try 0 0 0 0 2 3 0 0
+`        try
+if 0 0 1 0 3 3 0 0
+`            if (InitFg_UsingCameraNo[i] < EnableCameraNoList[0] or EnableCameraNoList[1] < InitFg_UsingCameraNo[i])
+InitFg_UsingCameraNo[i] < EnableCameraNoList[0] or EnableCameraNoList[1] < InitFg_UsingCameraNo[i]
+throw 0 0 1 0 4 3 0 0
+`                throw ([MY_H_ERR_WIPT2, ''])
+[MY_H_ERR_WIPT2, '']
+endif 0 0 0 0 3 3 42 0
+`            endif
+catch 0 0 0 1 2 3 41 0
+`        catch (Exception)
+Exception
+get_error_text 0 0 1 1 3 1 0 0
+`            get_error_text (MY_H_ERR_WIPT2, strs)
+MY_H_ERR_WIPT2
+strs
+throw 0 0 1 0 3 3 0 0
+`            throw ([MY_H_ERR_WIPT2, strs])
+[MY_H_ERR_WIPT2, strs]
+endtry 0 0 0 0 2 3 45 0
+`        endtry
+endfor 0 0 0 0 1 3 40 0
+`    endfor
+endif 0 0 0 0 0 3 39 0
+`endif
+comment 0 0 1 0 0 3 0 0
+`*
+
+comment 0 0 1 0 0 3 0 0
+`* ================================================================================
+================================================================================
+comment 0 0 1 0 0 3 0 0
+`* Open & analyze for camera configration file.
+Open & analyze for camera configration file.
+open_file 0 0 2 1 0 1 0 0
+`open_file (IniFilename, 'input', FileHandle)
+IniFilename
+'input'
+FileHandle
+comment 0 0 1 0 0 3 0 0
+`*
+
+assign 0 0 1 1 0 3 0 0
+`isOK_version := false
+false
+isOK_version
+assign 0 0 1 1 0 3 0 0
+`camera_no := -1
+-1
+camera_no
+try 0 0 0 0 0 3 0 0
+`try
+while 0 0 1 0 1 3 0 0
+`    while (true)
+true
+fread_line 0 0 1 2 2 1 0 0
+`        fread_line (FileHandle, strs, IsEOF)
+FileHandle
+strs
+IsEOF
+comment 0 0 1 0 2 3 0 0
+`        *
+
+if 0 0 1 0 2 3 0 0
+`        if (IsEOF)
+IsEOF
+comment 0 0 1 0 3 3 0 0
+`            * Exit analysis.
+Exit analysis.
+break 0 0 0 0 3 3 0 0
+`            break
+elseif 0 0 1 0 2 3 62 0
+`        elseif (|split(strs, split_str)| = 0)
+|split(strs, split_str)| = 0
+comment 0 0 1 0 3 3 0 0
+`            * Empty line
+Empty line
+continue 0 0 0 0 3 3 0 0
+`            continue
+elseif 0 0 1 0 2 3 65 0
+`        elseif (split(strs, split_str)[0]{0} = '#')
+split(strs, split_str)[0]{0} = '#'
+comment 0 0 1 0 3 3 0 0
+`            * Comment line
+Comment line
+continue 0 0 0 0 3 3 0 0
+`            continue
+elseif 0 0 1 0 2 3 68 0
+`        elseif (split(strs, split_str)[0]{0} = '<')
+split(strs, split_str)[0]{0} = '<'
+comment 0 0 1 0 3 3 0 0
+`            * Tag line
+Tag line
+assign 0 0 1 1 3 3 0 0
+`            strs := split(strs, split_str + '<>')
+split(strs, split_str + '<>')
+strs
+if 0 0 1 0 3 3 0 0
+`            if (strs[0] = 'camera')
+strs[0] = 'camera'
+try 0 0 0 0 4 3 0 0
+`                try
+try 0 0 0 0 5 3 0 0
+`                    try
+assign 0 0 1 1 6 3 0 0
+`                        camera_no := int(number(strs[1]))
+int(number(strs[1]))
+camera_no
+catch 0 0 0 1 5 3 76 0
+`                    catch (Exception)
+Exception
+throw 0 0 1 0 6 3 0 0
+`                        throw ('disable no')
+'disable no'
+endtry 0 0 0 0 5 3 78 0
+`                    endtry
+if 0 0 1 0 5 3 0 0
+`                    if (camera_no < EnableCameraNoList[0] or EnableCameraNoList[1] < camera_no)
+camera_no < EnableCameraNoList[0] or EnableCameraNoList[1] < camera_no
+comment 0 0 1 0 6 3 0 0
+`                        * Invalid camera no.
+Invalid camera no.
+throw 0 0 1 0 6 3 0 0
+`                        throw ('number over')
+'number over'
+endif 0 0 0 0 5 3 81 0
+`                    endif
+comment 0 0 1 0 5 3 0 0
+`                    *
+
+comment 0 0 1 0 5 3 0 0
+`                    * for parse_calibration_params
+for parse_calibration_params
+assign 0 0 1 1 5 3 0 0
+`                    CameraDataIndices := [CameraDataIndices, |CameraData|]
+[CameraDataIndices, |CameraData|]
+CameraDataIndices
+assign 0 0 1 1 5 3 0 0
+`                    CameraNoIndices := [CameraNoIndices, camera_no]
+[CameraNoIndices, camera_no]
+CameraNoIndices
+comment 0 0 1 0 5 3 0 0
+`                    *
+
+if 0 0 1 0 5 3 0 0
+`                    if (InitFg_UsingCameraNo = InitFg_UsingCameraNoParam_All)
+InitFg_UsingCameraNo = InitFg_UsingCameraNoParam_All
+comment 0 0 1 0 6 3 0 0
+`                        * Use all camera no. of the use list.
+Use all camera no. of the use list.
+elseif 0 0 1 0 5 3 90 0
+`                    elseif (find(InitFg_UsingCameraNo, camera_no) >= 0)
+find(InitFg_UsingCameraNo, camera_no) >= 0
+comment 0 0 1 0 6 3 0 0
+`                        * Included in the use list.
+Included in the use list.
+else 0 0 0 0 5 3 92 0
+`                    else
+comment 0 0 1 0 6 3 0 0
+`                        * Do not included in the use list.
+Do not included in the use list.
+throw 0 0 1 0 6 3 0 0
+`                        throw (0)
+0
+endif 0 0 0 0 5 3 94 0
+`                    endif
+comment 0 0 1 0 5 3 0 0
+`                    *
+
+comment 0 0 1 0 5 3 0 0
+`                    * for init_framegrabbers
+for init_framegrabbers
+assign 0 0 1 1 5 3 0 0
+`                    InitFg_CameraDataIndices := [InitFg_CameraDataIndices, |InitFg_CameraData|]
+[InitFg_CameraDataIndices, |InitFg_CameraData|]
+InitFg_CameraDataIndices
+assign 0 0 1 1 5 3 0 0
+`                    InitFg_CameraNoIndices := [InitFg_CameraNoIndices, camera_no]
+[InitFg_CameraNoIndices, camera_no]
+InitFg_CameraNoIndices
+comment 0 0 1 0 5 3 0 0
+`                    *
+
+catch 0 0 0 1 4 3 75 0
+`                catch (Exception)
+Exception
+comment 0 0 1 0 5 3 0 0
+`                    * Consider this block is commented out because camera no. is invalid.
+Consider this block is commented out because camera no. is invalid.
+assign 0 0 1 1 5 3 0 0
+`                    camera_no := -1
+-1
+camera_no
+if 0 0 1 0 5 3 0 0
+`                    if (Exception = 'disable no')
+Exception = 'disable no'
+assign 0 0 1 1 6 3 0 0
+`                        camera_no := -2
+-2
+camera_no
+endif 0 0 0 0 5 3 106 0
+`                    endif
+endtry 0 0 0 0 4 3 103 0
+`                endtry
+endif 0 0 0 0 3 3 74 0
+`            endif
+comment 0 0 1 0 3 3 0 0
+`            *
+
+ifelse 0 0 1 0 3 3 0 0
+`            if (strs[0]{0} # '/')
+strs[0]{0} # '/'
+comment 0 0 1 0 4 3 0 0
+`                * Start the block.
+Start the block.
+assign 0 0 1 1 4 3 0 0
+`                Blocks := [Blocks, '<' + strs[0] + '>']
+[Blocks, '<' + strs[0] + '>']
+Blocks
+else 0 0 0 0 3 3 112 0
+`            else
+comment 0 0 1 0 4 3 0 0
+`                * End this block.
+End this block.
+assign 0 0 1 1 4 3 0 0
+`                i := find(Blocks, '<' + strs{1:strlen(strs[0])-1} + '>')
+find(Blocks, '<' + strs{1:strlen(strs[0])-1} + '>')
+i
+assign 0 0 1 1 4 3 0 0
+`                Blocks := remove(Blocks, i)
+remove(Blocks, i)
+Blocks
+endif 0 0 0 0 3 3 115 0
+`            endif
+continue 0 0 0 0 3 3 0 0
+`            continue
+else 0 0 0 0 2 3 71 0
+`        else
+comment 0 0 1 0 3 3 0 0
+`            * Content line
+Content line
+assign 0 0 1 1 3 3 0 0
+`            i := strstr(strs, '#') - 1
+strstr(strs, '#') - 1
+i
+if 0 0 1 0 3 3 0 0
+`            if (i >= 0)
+i >= 0
+comment 0 0 1 0 4 3 0 0
+`                * Remove comment after content.
+Remove comment after content.
+tuple_str_first_n 0 0 2 1 4 1 0 0
+`                tuple_str_first_n (strs, i, strs)
+strs
+i
+strs
+endif 0 0 0 0 3 3 124 0
+`            endif
+assign 0 0 1 1 3 3 0 0
+`            strs := split(strs, split_str)
+split(strs, split_str)
+strs
+endif 0 0 0 0 2 3 121 0
+`        endif
+comment 0 0 1 0 2 3 0 0
+`        *
+
+comment 0 0 1 0 2 3 0 0
+`        * Go next step in case of content line. ------------------------
+Go next step in case of content line. ------------------------
+comment 0 0 1 0 2 3 0 0
+`        * (ex.1) strs = '0.2' # format_ver only
+(ex.1) strs = '0.2' # format_ver only
+comment 0 0 1 0 2 3 0 0
+`        * (ex.2) strs = ['+pixel_clock', '10']
+(ex.2) strs = ['+pixel_clock', '10']
+comment 0 0 1 0 2 3 0 0
+`        * (ex.3) strs = ['CameraPixelSize', '4.4e-6', '*']
+(ex.3) strs = ['CameraPixelSize', '4.4e-6', '*']
+comment 0 0 1 0 2 3 0 0
+`        *
+
+if 0 0 1 0 2 3 0 0
+`        if (find(Blocks, '<camera>') >= 0 and camera_no < 0)
+find(Blocks, '<camera>') >= 0 and camera_no < 0
+comment 0 0 1 0 3 3 0 0
+`            * Invalid camera no.
+Invalid camera no.
+continue 0 0 0 0 3 3 0 0
+`            continue
+endif 0 0 0 0 2 3 136 0
+`        endif
+comment 0 0 1 0 2 3 0 0
+`        *
+
+if 0 0 1 0 2 3 0 0
+`        if (find(Blocks, '<format_ver>') >= 0)
+find(Blocks, '<format_ver>') >= 0
+comment 0 0 1 0 3 3 0 0
+`            * Judge OK/NG about format version of camera configration file.
+Judge OK/NG about format version of camera configration file.
+assign 0 0 1 1 3 3 0 0
+`            versionsStr := ''
+''
+versionsStr
+for 0 0 3 1 3 3 0 0
+`            for i := 0 to |FileFormatVersions| - 1 by 1
+0
+|FileFormatVersions| - 1
+1
+i
+assign 0 0 1 1 4 3 0 0
+`                versionsStr := versionsStr + FileFormatVersions[i] + ' or '
+versionsStr + FileFormatVersions[i] + ' or '
+versionsStr
+if 0 0 1 0 4 3 0 0
+`                if (strs = FileFormatVersions[i])
+strs = FileFormatVersions[i]
+comment 0 0 1 0 5 3 0 0
+`                    * Version is ok.
+Version is ok.
+assign 0 0 1 1 5 3 0 0
+`                    isOK_version := true
+true
+isOK_version
+endif 0 0 0 0 4 3 146 0
+`                endif
+endfor 0 0 0 0 3 3 144 0
+`            endfor
+if 0 0 1 0 3 3 0 0
+`            if (not isOK_version)
+not isOK_version
+comment 0 0 1 0 4 3 0 0
+`                * Invalid version. Set error and break.
+Invalid version. Set error and break.
+assign 0 0 1 1 4 3 0 0
+`                versionsStr := versionsStr{0:strlen(versionsStr)-5}
+versionsStr{0:strlen(versionsStr)-5}
+versionsStr
+throw 0 0 1 0 4 3 0 0
+`                throw ([KVL_WRONG_FORMAT_VER, 'Wrong file version (required ' + versionsStr + ' / file ' + strs + ')'])
+[KVL_WRONG_FORMAT_VER, 'Wrong file version (required ' + versionsStr + ' / file ' + strs + ')']
+endif 0 0 0 0 3 3 151 0
+`            endif
+comment 0 0 1 0 3 3 0 0
+`            *
+
+elseif 0 0 1 0 2 3 141 0
+`        elseif (find(Blocks, '<framegrabber>') >= 0)
+find(Blocks, '<framegrabber>') >= 0
+comment 0 0 1 0 3 3 0 0
+`            * Read data of framegrabber configration.
+Read data of framegrabber configration.
+if 0 0 1 0 3 3 0 0
+`            if (find(Blocks, '<camera>') >= 0)
+find(Blocks, '<camera>') >= 0
+comment 0 0 1 0 4 3 0 0
+`                * Camera uniq value
+Camera uniq value
+assign 0 0 1 1 4 3 0 0
+`                InitFg_CameraData := [InitFg_CameraData, strs]
+[InitFg_CameraData, strs]
+InitFg_CameraData
+elseif 0 0 1 0 3 3 159 0
+`            elseif (find(Blocks, '<defaults>') >= 0)
+find(Blocks, '<defaults>') >= 0
+comment 0 0 1 0 4 3 0 0
+`                * Default value
+Default value
+assign 0 0 1 1 4 3 0 0
+`                InitFg_DefaultValues := [InitFg_DefaultValues, strs]
+[InitFg_DefaultValues, strs]
+InitFg_DefaultValues
+endif 0 0 0 0 3 3 162 0
+`            endif
+comment 0 0 1 0 3 3 0 0
+`            *
+
+elseif 0 0 1 0 2 3 157 0
+`        elseif (find(Blocks, '<calibration>') >= 0)
+find(Blocks, '<calibration>') >= 0
+comment 0 0 1 0 3 3 0 0
+`            * Read calibration parameters.
+Read calibration parameters.
+ifelse 0 0 1 0 3 3 0 0
+`            if (find(Blocks, '<camera>') >= 0)
+find(Blocks, '<camera>') >= 0
+assign 0 0 1 1 4 3 0 0
+`                strs_tmp := ''
+''
+strs_tmp
+for 0 0 3 1 4 3 0 0
+`                for j := 1 to |strs| - 1 by 1
+1
+|strs| - 1
+1
+j
+assign 0 0 1 1 5 3 0 0
+`                    strs_tmp := strs_tmp + strs[j] + ' '
+strs_tmp + strs[j] + ' '
+strs_tmp
+endfor 0 0 0 0 4 3 171 0
+`                endfor
+assign 0 0 1 1 4 3 0 0
+`                CameraData := [CameraData, CalibParamHeader + ' ' + strs[0], strs_tmp]
+[CameraData, CalibParamHeader + ' ' + strs[0], strs_tmp]
+CameraData
+else 0 0 0 0 3 3 169 0
+`            else
+comment 0 0 1 0 4 3 0 0
+`                * No default value
+No default value
+endif 0 0 0 0 3 3 175 0
+`            endif
+comment 0 0 1 0 3 3 0 0
+`            *
+
+endif 0 0 0 0 2 3 167 0
+`        endif
+endwhile 0 0 0 0 1 3 59 0
+`    endwhile
+comment 0 0 1 0 1 3 0 0
+`    *
+
+comment 0 0 1 0 1 3 0 0
+`    * In case of no format_ver
+In case of no format_ver
+if 0 0 1 0 1 3 0 0
+`    if (not isOK_version)
+not isOK_version
+throw 0 0 1 0 2 3 0 0
+`        throw ([KVL_WRONG_FORMAT_VER, 'Wrong file version'])
+[KVL_WRONG_FORMAT_VER, 'Wrong file version']
+endif 0 0 0 0 1 3 183 0
+`    endif
+catch 0 0 0 1 0 3 58 0
+`catch (Exception)
+Exception
+close_file 0 0 1 0 1 1 0 0
+`    close_file (FileHandle)
+FileHandle
+throw 0 0 1 0 1 3 0 0
+`    throw (Exception)
+Exception
+endtry 0 0 0 0 0 3 186 0
+`endtry
+comment 0 0 1 0 0 3 0 0
+`*
+
+comment 0 0 1 0 0 3 0 0
+`* Close camera configration file.
+Close camera configration file.
+close_file 0 0 1 0 0 1 0 0
+close_file (FileHandle)
+FileHandle
+comment 0 0 1 0 0 3 0 0
+`*
+
+comment 0 0 1 0 0 3 0 0
+`* Add end data for easy parse of data.
+Add end data for easy parse of data.
+assign 0 0 1 1 0 3 0 0
+`CameraDataIndices := [CameraDataIndices, |CameraData|]
+[CameraDataIndices, |CameraData|]
+CameraDataIndices
+assign 0 0 1 1 0 3 0 0
+`InitFg_CameraDataIndices := [InitFg_CameraDataIndices, |InitFg_CameraData|]
+[InitFg_CameraDataIndices, |InitFg_CameraData|]
+InitFg_CameraDataIndices
+comment 0 0 1 0 0 3 0 0
+`* 
+
+comment 0 0 1 0 0 3 0 0
+`* ================================================================================
+================================================================================
+comment 0 0 1 0 0 3 0 0
+`* Extract calibration parameters.
+Extract calibration parameters.
+comment 0 0 1 0 0 3 0 0
+`* <out>
+<out>
+comment 0 0 1 0 0 3 0 0
+`*   CalibrationParams = [
+  CalibrationParams = [
+comment 0 0 1 0 0 3 0 0
+`*       SplitLength (=8),
+      SplitLength (=8),
+comment 0 0 1 0 0 3 0 0
+`*       CalTabFile0, FocalLength0, CameraPixelWidth0, CameraPixelHeight0, ExposureName, ExpCoeff, ExpMin, ExpMax,
+      CalTabFile0, FocalLength0, CameraPixelWidth0, CameraPixelHeight0, ExposureName, ExpCoeff, ExpMin, ExpMax,
+comment 0 0 1 0 0 3 0 0
+`*       CalTabFile1,  ...
+      CalTabFile1,  ...
+comment 0 0 1 0 0 3 0 0
+`*   ]
+  ]
+comment 0 0 1 0 0 3 0 0
+`*
+
+comment 0 0 1 0 0 3 0 0
+`* (Ex.) In case of CameraNoIndices = [3, 1]
+(Ex.) In case of CameraNoIndices = [3, 1]
+comment 0 0 1 0 0 3 0 0
+`*   CalibrationParams = [
+  CalibrationParams = [
+comment 0 0 1 0 0 3 0 0
+`*       8,
+      8,
+comment 0 0 1 0 0 3 0 0
+`*       'none', 0, 0, 0, 'none', 0, '*', '*',
+      'none', 0, 0, 0, 'none', 0, '*', '*',
+comment 0 0 1 0 0 3 0 0
+`*       '02_2007_27.descr', 8.0e-3, 2.2e-6, 2.2e-6, 'exposure', 1.0, '*', '*',
+      '02_2007_27.descr', 8.0e-3, 2.2e-6, 2.2e-6, 'exposure', 1.0, '*', '*',
+comment 0 0 1 0 0 3 0 0
+`*       'none', 0, 0, 0, 'none', 0, '*', '*',
+      'none', 0, 0, 0, 'none', 0, '*', '*',
+comment 0 0 1 0 0 3 0 0
+`*       'caltab_30.0mm.descr', 3.6e-3, 6.0e-6, 6.0e-6, 'global_gain', 20, 10, 2000,
+      'caltab_30.0mm.descr', 3.6e-3, 6.0e-6, 6.0e-6, 'global_gain', 20, 10, 2000,
+comment 0 0 1 0 0 3 0 0
+`*   ]
+  ]
+comment 0 0 1 0 0 3 0 0
+`*
+
+assign 0 0 1 1 0 3 0 0
+`default_param := ['none', 0, 0, 0, 'none', 0, '*', '*']
+['none', 0, 0, 0, 'none', 0, '*', '*']
+default_param
+assign 0 0 1 1 0 3 0 0
+`split_len := |default_param|
+|default_param|
+split_len
+assign 0 0 1 1 0 3 0 0
+`CalibrationParams := [split_len]
+[split_len]
+CalibrationParams
+for 0 0 3 1 0 3 0 0
+`for i := 0 to max(CameraNoIndices) by 1
+0
+max(CameraNoIndices)
+1
+i
+assign 0 0 1 1 1 3 0 0
+`    CalibrationParams := [CalibrationParams, default_param]
+[CalibrationParams, default_param]
+CalibrationParams
+endfor 0 0 0 0 0 3 219 0
+`endfor
+comment 0 0 1 0 0 3 0 0
+`*
+
+for 0 0 3 1 0 3 0 0
+`for i := 0 to |CameraDataIndices| - 2 by 1
+0
+|CameraDataIndices| - 2
+1
+i
+ifelse 0 0 1 0 1 3 0 0
+`    if (CameraDataIndices[i] <= CameraDataIndices[i+1] - 1)
+CameraDataIndices[i] <= CameraDataIndices[i+1] - 1
+assign 0 0 1 1 2 3 0 0
+`        fg := CameraData[CameraDataIndices[i] : CameraDataIndices[i+1] - 1]
+CameraData[CameraDataIndices[i] : CameraDataIndices[i+1] - 1]
+fg
+else 0 0 0 0 1 3 224 0
+`    else
+assign 0 0 1 1 2 3 0 0
+`        fg := []
+[]
+fg
+endif 0 0 0 0 1 3 226 0
+`    endif
+assign 0 0 1 1 1 3 0 0
+`    param := default_param
+default_param
+param
+comment 0 0 1 0 1 3 0 0
+`    *
+
+for 0 0 3 1 1 3 0 0
+`    for j := 0 to |fg| - 1 by 2
+0
+|fg| - 1
+2
+j
+assign 0 0 1 1 2 3 0 0
+`        tmp := split(fg[j], split_str)
+split(fg[j], split_str)
+tmp
+assign 0 0 1 1 2 3 0 0
+`        tmp2 := split(fg[j + 1], split_str)
+split(fg[j + 1], split_str)
+tmp2
+if 0 0 1 0 2 3 0 0
+`        if (tmp[0] = CalibParamHeader)
+tmp[0] = CalibParamHeader
+comment 0 0 1 0 3 3 0 0
+`            * Select/parse/numeric-convert for calibration parameters.
+Select/parse/numeric-convert for calibration parameters.
+if 0 0 1 0 3 3 0 0
+`            if (tmp[1] = 'CaltabFile' or tmp[1] = 'CalTabFile')
+tmp[1] = 'CaltabFile' or tmp[1] = 'CalTabFile'
+comment 0 0 1 0 4 3 0 0
+`                * Extract before string of last char. because last char. is space.
+Extract before string of last char. because last char. is space.
+insert 0 0 3 1 4 3 0 0
+`                param[0] := fg[j + 1]{0 : strlen(fg[j+1])-2}
+param
+fg[j + 1]{0 : strlen(fg[j+1])-2}
+0
+param
+elseif 0 0 1 0 3 3 236 0
+`            elseif (tmp[1] = 'FocalLength' or tmp[1] = 'LenzFocusLength')
+tmp[1] = 'FocalLength' or tmp[1] = 'LenzFocusLength'
+insert 0 0 3 1 4 3 0 0
+`                param[1] := number(tmp2)
+param
+number(tmp2)
+1
+param
+elseif 0 0 1 0 3 3 239 0
+`            elseif (tmp[1] = 'CameraPixelSize')
+tmp[1] = 'CameraPixelSize'
+insert 0 0 3 1 4 3 0 0
+`                param[2] := number(tmp2[0])
+param
+number(tmp2[0])
+2
+param
+insert 0 0 3 1 4 3 0 0
+`                param[3] := number(tmp2[1])
+param
+number(tmp2[1])
+3
+param
+if 0 0 1 0 4 3 0 0
+`                if (not is_number(param[3]))
+not is_number(param[3])
+comment 0 0 1 0 5 3 0 0
+`                    * Conside the same value for v.value to h.value in case v.value of pix. is not numeric.
+Conside the same value for v.value to h.value in case v.value of pix. is not numeric.
+insert 0 0 3 1 5 3 0 0
+`                    param[3] := param[2]
+param
+param[2]
+3
+param
+endif 0 0 0 0 4 3 244 0
+`                endif
+elseif 0 0 1 0 3 3 241 0
+`            elseif (tmp[1] = 'ExposureParams' or tmp[1] = 'GainContParam')
+tmp[1] = 'ExposureParams' or tmp[1] = 'GainContParam'
+insert 0 0 3 1 4 3 0 0
+`                param[4] := tmp2[0]
+param
+tmp2[0]
+4
+param
+insert 0 0 3 1 4 3 0 0
+`                param[5] := number(tmp2[1])
+param
+number(tmp2[1])
+5
+param
+if 0 0 1 0 4 3 0 0
+`                if (|tmp2| >= 4)
+|tmp2| >= 4
+insert 0 0 3 1 5 3 0 0
+`                    param[6] := number(tmp2[2])
+param
+number(tmp2[2])
+6
+param
+insert 0 0 3 1 5 3 0 0
+`                    param[7] := number(tmp2[3])
+param
+number(tmp2[3])
+7
+param
+endif 0 0 0 0 4 3 251 0
+`                endif
+else 0 0 0 0 3 3 248 0
+`            else
+comment 0 0 1 0 4 3 0 0
+`                * No corresponded parameter.
+No corresponded parameter.
+endif 0 0 0 0 3 3 255 0
+`            endif
+endif 0 0 0 0 2 3 234 0
+`        endif
+endfor 0 0 0 0 1 3 231 0
+`    endfor
+comment 0 0 1 0 1 3 0 0
+`    *
+
+for 0 0 3 1 1 3 0 0
+`    for j := 0 to split_len - 1 by 1
+0
+split_len - 1
+1
+j
+insert 0 0 3 1 2 3 0 0
+`        CalibrationParams[1 + CameraNoIndices[i] * split_len + j] := param[j]
+CalibrationParams
+param[j]
+1 + CameraNoIndices[i] * split_len + j
+CalibrationParams
+endfor 0 0 0 0 1 3 261 0
+`    endfor
+endfor 0 0 0 0 0 3 223 0
+`endfor
+comment 0 0 1 0 0 3 0 0
+`* 
+
+return 0 0 0 0 0 3 0 0
+`return ()
+<proc_docu id="extract_calibration_params">
+  <abstract lang="en_US">Extract calibration parameters from camera configration file which is used in procedure init_framegrabbers().
+It also extracts parameter for init_framegrabbers().
+
+Exception will be throwin that case it can not read a file specified by IniFilename.
+
+--------------------------------------------------
+About out-parameter CalibrationParams:
+
+(Format)
+CalibrationParams = [
+    SplitLength (=8),
+    CalTabFile0, FocalLength0, CamPixWidth0, CamPixHeight0, ExpName0, ExpCoeff0, ExpMin, ExpMax,
+    CalTabFile1,  ...
+ ]
+
+(Terminology)
+CamPix: Camera Pixel / Exp: Exposure Time
+
+(Unit)
+FocalLength [m]
+CamPix [m]
+ExpCoeff [msec/raw] (raw: framegrabber value)
+ExpMin/Max [msec]
+
+The following values will be substituted as default value in the case that the device definition does not include parameter for calibration.
+('none', 0, 0, 0, 'none', 0, '*', '*')
+</abstract>
+  <abstract lang="ja_JP">init_framegrabbers で使用するカメラ設定ファイルから，キャリブレーション用パラメーターを抽出します。
+init_framegrabbers 用のパラメーターも抽出されます。
+
+IniFilename で指定されたファイルを読み込めない場合，例外が発生します。
+
+--------------------------------------------------
+out型パラメーター CalibrationParams について:
+
+(書式)
+CalibrationParams = [
+    SplitLength (=8),
+    CalTabFile0, FocalLength0, CamPixWidth0, CamPixHeight0, ExpName0, ExpCoeff0, ExpMin, ExpMax,
+    CalTabFile1,  ...
+ ]
+
+(用語)
+CamPix: Camera Pixel / Exp: Exposure Time
+
+(単位)
+FocalLength [m]
+CamPix [m]
+ExpCoeff [msec/raw] （raw: フレームグラバー値）
+ExpMin/Max [msec]
+
+デバイス定義にキャリブレーション用パラメータが含まれていない場合は，デフォルト値として以下の値が代入されます。
+  ('none', 0, 0, 0, 'none', 0, '*', '*')
+</abstract>
+  <chapters lang="en_US">
+    <item>Utilities</item>
+  </chapters>
+  <chapters lang="ja_JP">
+    <item>Utilities</item>
+  </chapters>
+  <example lang="en_US">&lt;Example 1&gt; In the case of defining three devices
+
+* get_nextage_camparam_path is included in sample_procedures.dev
+* in HALCON folder at destination of NEXTAGE Vision SDK installation.
+get_nextage_camparam_path ('V21', CamParamPath, CalTabPath)
+CameraSettingsFilename := CamParamPath + 'CameraSettings.dat'
+extract_calibration_params (CameraSettingsFilename, 'all', CalibrationParams, _, _, _, _)
+
+&gt; contents of CalibrationParams
+&gt; [
+&gt;   8,
+&gt;   '02_2007_27.descr', 8.0e-3, 2.2e-6, 2.2e-6, 'exposure', 1.0, '*', '*'
+&gt;   'none', 0, 0, 0, 'none', 0,
+&gt;   'caltab_30.0mm.descr', 3.6e-3, 6.0e-6, 6.0e-6, 'global_gain', 0.062074, 10, 500
+&gt; ]
+
+
+&lt;Example 2&gt; Extract exposure adjustment parameter name of certain camera number
+
+extract_calibration_params (CameraSettingsFilename, 'all', CalibrationParams, _, _, _, _)
+ExposureParamName := CalibrationParams[1 + CameraNo * CalibrationParams[0] + 4]
+</example>
+  <example lang="ja_JP">＜例 1＞ デバイスを 3個 定義した場合
+
+* get_nextage_camparam_path は NEXTAGE Vision SDK インストール先の Halcon フォルダーにある
+* sample_procedures.dev に含まれています。
+get_nextage_camparam_path ('V21', CamParamPath, CalTabPath)
+CameraSettingsFilename := CamParamPath + 'CameraSettings.dat'
+extract_calibration_params (CameraSettingsFilename, 'all', CalibrationParams, _, _, _, _)
+
+&gt; CalibrationParams の中身
+&gt; [
+&gt;   8,
+&gt;   '02_2007_27.descr', 8.0e-3, 2.2e-6, 2.2e-6, 'exposure', 1.0, '*', '*'
+&gt;   'none', 0, 0, 0, 'none', 0,
+&gt;   'caltab_30.0mm.descr', 3.6e-3, 6.0e-6, 6.0e-6, 'global_gain', 0.062074, 10, 500
+&gt; ]
+
+
+＜例 2＞ 特定カメラ番号の露出調整パラメーター名を抽出する
+
+extract_calibration_params (CameraSettingsFilename, 'all', CalibrationParams, _, _, _, _)
+ExposureParamName := CalibrationParams[1 + CameraNo * CalibrationParams[0] + 4]
+</example>
+  <library lang="en_US">NEXTAGE Vision Procedures</library>
+  <library lang="ja_JP">NEXTAGE Vision Procedures</library>
+  <see_also>
+    <item>init_framegrabbers</item>
+    <item>get_nextage_camparam_path</item>
+  </see_also>
+  <short lang="en_US">Extract calibration parameters from camera configration file.</short>
+  <short lang="ja_JP">カメラ設定ファイルからキャリブレーション用パラメーターを抽出します。</short>
+  <parameters>
+    <parameter id="CalibrationParams">
+      <description lang="en_US">List of calibration parameters
+(see above description for format)</description>
+      <description lang="ja_JP">キャリブレーション用パラメーターのリスト
+（フォーマットは本文を参照してください）</description>
+      <mixed_type>optional</mixed_type>
+      <multivalue>optional</multivalue>
+      <sem_type>any</sem_type>
+    </parameter>
+    <parameter id="IniFilename">
+      <description lang="en_US">Camera configration filename</description>
+      <description lang="ja_JP">カメラ設定ファイル名</description>
+      <mixed_type>false</mixed_type>
+      <multivalue>false</multivalue>
+      <sem_type>filename</sem_type>
+      <type_list>
+        <item>string</item>
+      </type_list>
+    </parameter>
+    <parameter id="InitFg_CameraData">
+      <description lang="en_US">CameraData for init_framegrabbers()</description>
+      <description lang="ja_JP">init_framegrabbers() 用 CameraData</description>
+    </parameter>
+    <parameter id="InitFg_CameraDataIndices">
+      <description lang="en_US">CameraDataIndices for init_framegrabbers()</description>
+      <description lang="ja_JP">init_framegrabbers() 用 CameraDataIndices</description>
+    </parameter>
+    <parameter id="InitFg_CameraNoIndices">
+      <description lang="en_US">CameraNoIndices for init_framegrabbers()</description>
+      <description lang="ja_JP">init_framegrabbers() 用 CameraNoIndices</description>
+    </parameter>
+    <parameter id="InitFg_DefaultValues">
+      <description lang="en_US">DefaultValues for init_framegrabbers()</description>
+      <description lang="ja_JP">init_framegrabbers() 用 DefaultValues</description>
+    </parameter>
+    <parameter id="InitFg_UsingCameraNo">
+      <default_value>'all'</default_value>
+      <description lang="en_US">Camera number to be used in init_framegrabbers()
+(string 'all' or integer or integer list)</description>
+      <description lang="ja_JP">init_framegrabbers() で使用したいカメラ番号 （文字列 'all' or 整数 or 整数リスト）</description>
+      <mixed_type>false</mixed_type>
+      <multivalue>optional</multivalue>
+      <sem_type>any</sem_type>
+      <type_list>
+        <item>integer</item>
+        <item>string</item>
+      </type_list>
+      <values>
+        <item>'all'</item>
+        <item>[0,1]</item>
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+      </values>
+    </parameter>
+  </parameters>
+</proc_docu>

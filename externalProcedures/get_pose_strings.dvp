@@ -1,0 +1,267 @@
+2 6
+102110560
+get_pose_strings 0 0 4 1
+位置･姿勢を表す文字列を取得します。
+Utilities
+Pose tuple pose
+Kind tuple integer
+NumericFormat tuple string
+DoConvertUnit_from_m_To_mm tuple integer
+PoseStrings tuple string
+0
+44
+comment 0 0 1 0 0 3 0 0
+`* ///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+comment 0 0 1 0 0 3 0 0
+`* 
+
+comment 0 0 1 0 0 3 0 0
+`* Obtain strings of position and posture.
+Obtain strings of position and posture.
+comment 0 0 1 0 0 3 0 0
+`* 
+
+comment 0 0 1 0 0 3 0 0
+`* Usage: Reffer to the HDevelop online help.
+Usage: Reffer to the HDevelop online help.
+comment 0 0 1 0 0 3 0 0
+`* 
+
+comment 0 0 1 0 0 3 0 0
+`* ///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+comment 0 0 1 0 0 3 0 0
+`*
+
+if 0 0 1 0 0 3 0 0
+`if ((|Pose| # 6) and (|Pose| # 7))
+(|Pose| # 6) and (|Pose| # 7)
+assign 0 0 1 1 1 3 0 0
+`    PoseStrings := ''
+''
+PoseStrings
+return 0 0 0 0 1 3 0 0
+`    return ()
+endif 0 0 0 0 0 3 9 0
+`endif
+comment 0 0 1 0 0 3 0 0
+`*
+
+assign 0 0 1 1 0 3 0 0
+`p := Pose
+Pose
+p
+assign 0 0 1 1 0 3 0 0
+`fmt := NumericFormat
+NumericFormat
+fmt
+comment 0 0 1 0 0 3 0 0
+`*
+
+ifelse 0 0 1 0 0 3 0 0
+`if (DoConvertUnit_from_m_To_mm # 0)
+DoConvertUnit_from_m_To_mm # 0
+insert 0 0 3 1 1 3 0 0
+`    p[0] := p[0] * 1000.0
+p
+p[0] * 1000.0
+0
+p
+insert 0 0 3 1 1 3 0 0
+`    p[1] := p[1] * 1000.0
+p
+p[1] * 1000.0
+1
+p
+insert 0 0 3 1 1 3 0 0
+`    p[2] := p[2] * 1000.0
+p
+p[2] * 1000.0
+2
+p
+else 0 0 0 0 0 3 17 0
+`else
+assign 0 0 1 1 1 3 0 0
+`    p := Pose
+Pose
+p
+endif 0 0 0 0 0 3 21 0
+`endif
+comment 0 0 1 0 0 3 0 0
+`*
+
+if 0 0 1 0 0 3 0 0
+`if (Kind = 0 or Kind = 1)
+Kind = 0 or Kind = 1
+assign 0 0 1 1 1 3 0 0
+`    PoseStrings := p[0]$fmt + ',' + p[1]$fmt + ',' + p[2]$fmt + ' [mm] ' + p[3]$fmt + ',' + p[4]$fmt + ',' + p[5]$fmt + ' [deg]'
+p[0]$fmt + ',' + p[1]$fmt + ',' + p[2]$fmt + ' [mm] ' + p[3]$fmt + ',' + p[4]$fmt + ',' + p[5]$fmt + ' [deg]'
+PoseStrings
+elseif 0 0 1 0 0 3 25 0
+`elseif (Kind = 2 or Kind = 3)
+Kind = 2 or Kind = 3
+assign 0 0 1 1 1 3 0 0
+`    PoseStrings := p[0]$fmt + ',' + p[1]$fmt + ',' + p[2]$fmt + ' , ' + p[3]$fmt + ',' + p[4]$fmt + ',' + p[5]$fmt + ' [mm, deg]'
+p[0]$fmt + ',' + p[1]$fmt + ',' + p[2]$fmt + ' , ' + p[3]$fmt + ',' + p[4]$fmt + ',' + p[5]$fmt + ' [mm, deg]'
+PoseStrings
+else 0 0 0 0 0 3 27 0
+`else
+assign 0 0 1 1 1 3 0 0
+`    PoseStrings := p[0]$fmt + ',' + p[1]$fmt + ',' + p[2]$fmt + ' , ' + p[3]$fmt + ',' + p[4]$fmt + ',' + p[5]$fmt
+p[0]$fmt + ',' + p[1]$fmt + ',' + p[2]$fmt + ' , ' + p[3]$fmt + ',' + p[4]$fmt + ',' + p[5]$fmt
+PoseStrings
+endif 0 0 0 0 0 3 29 0
+`endif
+comment 0 0 1 0 0 3 0 0
+`*
+
+if 0 0 1 0 0 3 0 0
+`if ((Kind = 1 or Kind = 3 or Kind = 5) and (|Pose| = 7))
+(Kind = 1 or Kind = 3 or Kind = 5) and (|Pose| = 7)
+if 0 0 1 0 1 3 0 0
+`    if (Pose[6] = 0)
+Pose[6] = 0
+assign 0 0 1 1 2 3 0 0
+`        poseType := 'gba'
+'gba'
+poseType
+elseif 0 0 1 0 1 3 34 0
+`    elseif (Pose[6] = 2)
+Pose[6] = 2
+assign 0 0 1 1 2 3 0 0
+`        poseType := 'abg'
+'abg'
+poseType
+else 0 0 0 0 1 3 36 0
+`    else
+assign 0 0 1 1 2 3 0 0
+`        poseType := Pose[6]$'d'
+Pose[6]$'d'
+poseType
+endif 0 0 0 0 1 3 38 0
+`    endif
+assign 0 0 1 1 1 3 0 0
+`    PoseStrings := PoseStrings + '  <type: ' + poseType + '>'
+PoseStrings + '  <type: ' + poseType + '>'
+PoseStrings
+endif 0 0 0 0 0 3 33 0
+`endif
+comment 0 0 1 0 0 3 0 0
+`*
+
+return 0 0 0 0 0 3 0 0
+`return ()
+<proc_docu id="get_pose_strings">
+  <abstract lang="en_US">Obtain strings of position and posture.
+
+Specify string type for Kind.
+
+0: xxx, xxx, xxx [mm] xxx, xxx, xxx [deg]
+1: xxx, xxx, xxx [mm] xxx, xxx, xxx [deg]  &lt;type: xxx&gt;
+2: xxx, xxx, xxx , xxx, xxx, xxx [mm, deg]
+3: xxx, xxx, xxx , xxx, xxx, xxx [mm, deg]  &lt;type: xxx&gt;
+4: xxx, xxx, xxx , xxx, xxx, xxx
+5: xxx, xxx, xxx , xxx, xxx, xxx &lt;type: xxx&gt;
+
+However, since there is no type information in the case that tuple length of Pose is 6, it treats Kind= 1 as 0, Kind = 3 as 2 and Kind = 5 as 4.
+</abstract>
+  <abstract lang="ja_JP">位置･姿勢 （Pose） を表す文字列を取得します。
+
+文字列の種類は Kind で指定します。
+
+0: xxx, xxx, xxx [mm] xxx, xxx, xxx [deg]
+1: xxx, xxx, xxx [mm] xxx, xxx, xxx [deg]  &lt;type: xxx&gt;
+2: xxx, xxx, xxx , xxx, xxx, xxx [mm, deg]
+3: xxx, xxx, xxx , xxx, xxx, xxx [mm, deg]  &lt;type: xxx&gt;
+4: xxx, xxx, xxx , xxx, xxx, xxx
+5: xxx, xxx, xxx , xxx, xxx, xxx &lt;type: xxx&gt;
+
+ただし， Pose のTuple長が 6 の場合は type 情報が存在しないため， Kind = 1 は 0 として， Kind = 3 は 2 として， Kind = 5 は 4 として扱われます。
+</abstract>
+  <chapters lang="en_US">
+    <item>Utilities</item>
+  </chapters>
+  <chapters lang="ja_JP">
+    <item>Utilities</item>
+  </chapters>
+  <library lang="en_US">NEXTAGE Vision Procedures</library>
+  <library lang="ja_JP">NEXTAGE Vision Procedures</library>
+  <short lang="en_US">Obtain strings of position and posture.</short>
+  <short lang="ja_JP">位置･姿勢を表す文字列を取得します。</short>
+  <parameters>
+    <parameter id="DoConvertUnit_from_m_To_mm">
+      <default_value>0</default_value>
+      <description lang="en_US">Conversion flag of m -&gt; mm
+ (converted in other than 0 or false)</description>
+      <description lang="ja_JP">m -&gt; mm の変換フラグ （0 or false 以外で変換）</description>
+      <mixed_type>false</mixed_type>
+      <multivalue>false</multivalue>
+      <sem_type>integer</sem_type>
+      <type_list>
+        <item>integer</item>
+      </type_list>
+      <value_list>
+        <item>0</item>
+        <item>1</item>
+      </value_list>
+    </parameter>
+    <parameter id="Kind">
+      <default_value>0</default_value>
+      <description lang="en_US">Type of obtained strings</description>
+      <description lang="ja_JP">得られる文字列の種類</description>
+      <mixed_type>false</mixed_type>
+      <multivalue>false</multivalue>
+      <sem_type>integer</sem_type>
+      <type_list>
+        <item>integer</item>
+      </type_list>
+      <values>
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+      </values>
+    </parameter>
+    <parameter id="NumericFormat">
+      <default_value>'8.2f'</default_value>
+      <description lang="en_US">Conversion format of values</description>
+      <description lang="ja_JP">数値の変換書式</description>
+      <mixed_type>false</mixed_type>
+      <multivalue>false</multivalue>
+      <sem_type>string</sem_type>
+      <type_list>
+        <item>string</item>
+      </type_list>
+      <values>
+        <item>'7.1f'</item>
+        <item>'8.2f'</item>
+        <item>'9.2f'</item>
+        <item>'9.3f'</item>
+      </values>
+    </parameter>
+    <parameter id="Pose">
+      <description lang="en_US">Target position and posture (tuple length is 6 or 7)</description>
+      <description lang="ja_JP">変換したいPose （Tuple長 6 or 7）</description>
+      <mixed_type>optional</mixed_type>
+      <multivalue>true</multivalue>
+      <sem_type>pose</sem_type>
+      <type_list>
+        <item>integer</item>
+        <item>real</item>
+      </type_list>
+    </parameter>
+    <parameter id="PoseStrings">
+      <description lang="en_US">Converted strings</description>
+      <description lang="ja_JP">変換された文字列</description>
+      <mixed_type>false</mixed_type>
+      <multivalue>false</multivalue>
+      <sem_type>string</sem_type>
+      <type_list>
+        <item>string</item>
+      </type_list>
+    </parameter>
+  </parameters>
+</proc_docu>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.0" halcon_version="10.0.3" cs="3874499395">
+<procedure name="read_ordered_default_parameters">
+<interface>
+<ic>
+<par name="DefaultFilename"/>
+</ic>
+<oc>
+<par name="ParamNames"/>
+<par name="ParamValues"/>
+<par name="ParamComments"/>
+</oc>
+</interface>
+<body>
+<c>* デフォルトパラメータファイルを開く</c>
+<l>ParamNames := []</l>
+<l>ParamValues := []</l>
+<l>ParamComments := []</l>
+<c></c>
+<l>file_exists (DefaultFilename, FileExists)</l>
+<l>if (not FileExists)</l>
+<l>    throw ([99, ['File Not Found', DefaultFilename, FileExists]])</l>
+<l>endif</l>
+<c></c>
+<l>open_file (DefaultFilename, 'input', FileHandle)</l>
+<l>while (1)</l>
+<l>    fread_line (FileHandle, Line, IsEOF)</l>
+<l>    if (IsEOF)</l>
+<l>        break</l>
+<l>    endif</l>
+<c>    * 最初が#の行はコメントとして読み飛ばす</c>
+<l>    if(Line{0} = '#')</l>
+<l>        continue</l>
+<l>    endif</l>
+<c>    * : で分割</c>
+<l>    tuple_regexp_match(Line, '([^ :]*) *: *([^ :]*) *:* *([^\n]*)', tmp)</l>
+<c>    * 空行、もしくは:のない行は読み飛ばす</c>
+<l>    if (strlen(tmp[0]) = 0)</l>
+<l>        continue</l>
+<l>    else</l>
+<l>        ParamNames := [ParamNames, tmp[0]]</l>
+<l>        ParamValues := [ParamValues, tmp[1]]</l>
+<l>        ParamComments := [ParamComments, tmp[2]]</l>
+<l>    endif</l>
+<l>endwhile</l>
+<l>close_file (FileHandle)</l>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="read_ordered_default_parameters">
+<abstract lang="ja_JP">デフォルトファイルを用いて，ファイルからパラメータを読み込む．</abstract>
+<short lang="ja_JP">パラメータを読み込む</short>
+<parameters>
+<parameter id="DefaultFilename">
+<description lang="ja_JP">デフォルトファイル名</description>
+<mixed_type>false</mixed_type>
+<multivalue>false</multivalue>
+<sem_type>filename</sem_type>
+<type_list>
+<item>string</item>
+</type_list>
+</parameter>
+<parameter id="ParamComments"/>
+<parameter id="ParamNames">
+<description lang="ja_JP">パラメータ</description>
+<multivalue>true</multivalue>
+<sem_type>any</sem_type>
+</parameter>
+<parameter id="ParamValues"/>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.0" halcon_version="10.0.1" cs="997716855">
+<procedure name="convert_poses_from_base_to_camera">
+<interface>
+<ic>
+<par name="ToolPoseInBase"/>
+<par name="ToolPoseInCam"/>
+<par name="ObjPoseInBase"/>
+</ic>
+<oc>
+<par name="ObjPoseInCam"/>
+</oc>
+</interface>
+<body>
+<l>ObjPoseInCam := []</l>
+<c>*</c>
+<l>tmp := ToolPoseInBase</l>
+<l>if (|tmp| = 6)</l>
+<l>    ToolPoseInBaseLength := 6</l>
+<l>    ToolPoseInBase := [tmp[0]/1000.0, tmp[1]/1000.0, tmp[2]/1000.0, tmp[3], tmp[4], tmp[5], 2]</l>
+<l>elseif (|tmp| = 7)</l>
+<l>    ToolPoseInBaseLength := 7</l>
+<l>    ToolPoseInBase := [tmp[0]/1000.0, tmp[1]/1000.0, tmp[2]/1000.0, tmp[3], tmp[4], tmp[5], tmp[6]]</l>
+<l>else</l>
+<l>    H_ERR_WIPT1 := 1201</l>
+<l>    get_error_text (H_ERR_WIPT1, msg)</l>
+<l>    throw ([H_ERR_WIPT1, msg])</l>
+<l>endif</l>
+<c>*</c>
+<l> tmp := ObjPoseInBase</l>
+<l> ObjPoseInBase := []</l>
+<l>if (|tmp| % 6 = 0)</l>
+<l>    ObjPoseInBaseLength := 6</l>
+<l>    for i := 0 to |tmp|/6-1 by 1</l>
+<l>        ObjPoseInBase := [ObjPoseInBase, tmp[i*6]/1000.0, tmp[i*6+1]/1000.0, tmp[i*6+2]/1000.0, tmp[i*6+3], tmp[i*6+4], tmp[i*6+5], 2]</l>
+<l>    endfor</l>
+<l>elseif (|tmp| % 7 = 0)</l>
+<l>    ObjPoseInBaseLength := 7</l>
+<l>    for i := 0 to |tmp|/7-1 by 1</l>
+<l>        ObjPoseInBase := [ObjPoseInBase, tmp[i*7]/1000.0, tmp[i*7+1]/1000.0, tmp[i*7+2]/1000.0, tmp[i*7+3], tmp[i*7+4], tmp[i*7+5], tmp[i*7+6]]</l>
+<l>    endfor</l>
+<l>else</l>
+<l>    H_ERR_WIPT1 := 1201</l>
+<l>    get_error_text (H_ERR_WIPT1, msg)</l>
+<l>    throw ([H_ERR_WIPT1, msg])</l>
+<l>endif</l>
+<c>*</c>
+<l>pose_to_hom_mat3d (ToolPoseInBase, base_H_tool)</l>
+<c>*</c>
+<l>pose_to_hom_mat3d (ToolPoseInCam, cam_H_tool)</l>
+<c></c>
+<l>hom_mat3d_invert (base_H_tool, tool_H_base)</l>
+<c>*</c>
+<c>* convert pose</c>
+<l>for i := 0 to |ObjPoseInBase| - 1 by 7</l>
+<l>    pose_to_hom_mat3d (ObjPoseInBase[i:i+6], base_H_obj)</l>
+<c>    *</c>
+<l>    hom_mat3d_compose (cam_H_tool, tool_H_base, cam_H_base)</l>
+<l>    hom_mat3d_compose (cam_H_base, base_H_obj, cam_H_obj)</l>
+<c>    *</c>
+<l>    hom_mat3d_to_pose (cam_H_obj, tmp)</l>
+<l>    convert_pose_type (tmp, 'Rp+T', 'gba', 'point', tmp)</l>
+<l>    tuple_concat(ObjPoseInCam, tmp, ObjPoseInCam)</l>
+<l>endfor</l>
+<c>*</c>
+<l>return ()</l>
+</body>
+<docu id="convert_poses_from_base_to_camera">
+<abstract lang="ja_JP">ベース座標系基準のポーズを，カメラ座標系基準とベース座標系基準，両方のToolポーズを用いて，カメラ座標系基準に変換する．
+
+ベース座標系基準のToolポーズはTuple長6もしくは7のものに対応している．
+
+ベース座標系基準のワークポーズはTuple長6もしくは7のものに対応している．
+複数のポーズを入力することも可能で，その場合のTuple長は6*iもしくは7*i(i = 1, 2, …)となる．なお，Tuple長が42の倍数となったときは，6*iであるものとして扱う．
+
+出力であるカメラ座標系基準のオブジェクトポーズのTuple長は7*iとなる．</abstract>
+<short lang="ja_JP">ベース座標系基準でのワークの位置姿勢を，カメラ座標系基準に変換する．</short>
+<parameters>
+<parameter id="ObjPoseInBase">
+<description lang="ja_JP">ベース座標系基準のワークポーズ[mm, deg]．</description>
+<multivalue>true</multivalue>
+<sem_type>pose</sem_type>
+<type_list>
+<item>integer</item>
+<item>real</item>
+</type_list>
+</parameter>
+<parameter id="ObjPoseInCam">
+<description lang="ja_JP">出力される，カメラ座標系基準のオブジェクトポーズ[m, deg]．</description>
+<multivalue>true</multivalue>
+<sem_type>pose</sem_type>
+<type_list>
+<item>integer</item>
+<item>real</item>
+</type_list>
+</parameter>
+<parameter id="ToolPoseInBase">
+<description lang="ja_JP">ベース座標系基準のToolポーズ[mm, deg]．</description>
+<multivalue>true</multivalue>
+<sem_type>pose</sem_type>
+<type_list>
+<item>integer</item>
+<item>real</item>
+</type_list>
+</parameter>
+<parameter id="ToolPoseInCam">
+<description lang="ja_JP">カメラ座標系基準のToolポーズ[m, deg]．</description>
+<multivalue>true</multivalue>
+<sem_type>pose</sem_type>
+<type_list>
+<item>integer</item>
+<item>real</item>
+</type_list>
+</parameter>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>

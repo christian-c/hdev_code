@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.0" halcon_version="10.0.1" cs="3942616744">
+<procedure name="get_default_contrast">
+<interface>
+<io>
+<par name="Image"/>
+<par name="Region"/>
+</io>
+<ic>
+<par name="CreateParams"/>
+</ic>
+<oc>
+<par name="Contrast"/>
+</oc>
+</interface>
+<body>
+<c>* CrateParamsの要素数チェック</c>
+<l>if(|CreateParams| # 19)</l>
+<l>    H_ERR_WINPV1 := 1301</l>
+<l>    get_error_text (H_ERR_WINPV1, msg)</l>
+<l>    throw([H_ERR_WINPV1, msg])</l>
+<l>endif</l>
+<c></c>
+<c>* パラメーター取得</c>
+<l>ColorSpace        := CreateParams[0]</l>
+<l>useChannel        := CreateParams[1]</l>
+<c>* FindMinScore</c>
+<l>MinScore          := CreateParams[3]</l>
+<l>AngleStart        := CreateParams[4]</l>
+<l>AngleExtent       := CreateParams[5]</l>
+<l>Greediness        := CreateParams[6]</l>
+<l>findScaleRCMinMax := [CreateParams[7], CreateParams[8], CreateParams[9], CreateParams[10]]</l>
+<l>angle_distortion  := CreateParams[11]</l>
+<l>scale_distortion  := CreateParams[12]</l>
+<c>*numLevelMin</c>
+<l>numLevelMax       := CreateParams[14]</l>
+<c></c>
+<c>* ScaleRMin/Max, ScaleCMinMax</c>
+<l>scaleMin := findScaleRCMinMax[0]</l>
+<l>if (findScaleRCMinMax[0] &gt; findScaleRCMinMax[2])</l>
+<l>    scaleMin := findScaleRCMinMax[2]</l>
+<l>endif</l>
+<l>scaleMax := findScaleRCMinMax[1]</l>
+<l>if (findScaleRCMinMax[1] &lt; findScaleRCMinMax[3])</l>
+<l>    scaleMax := findScaleRCMinMax[3]</l>
+<l>endif</l>
+<c></c>
+<c>* AngleDsitortion, AnisoScaleDistortion</c>
+<l>if (angle_distortion = 'None' and scale_distortion = 'None')</l>
+<l>    findParamNames := []</l>
+<l>    findParamVals  := []</l>
+<l>elseif (angle_distortion # 'None' and scale_distortion = 'None')</l>
+<l>    findParamNames := ['max_angle_distortion']</l>
+<l>    findParamVals  := [angle_distortion]</l>
+<l>elseif (angle_distortion = 'None' and scale_distortion # 'None')</l>
+<l>    findParamNames := ['max_aniso_scale_distortion']</l>
+<l>    findParamVals  := [scale_distortion]  </l>
+<l>else</l>
+<l>    findParamNames := ['max_angle_distortion', 'max_aniso_scale_distortion']</l>
+<l>    findParamVals  := [angle_distortion, scale_distortion] </l>
+<l>endif</l>
+<c></c>
+<c>* </c>
+<c>* モデル登録前に，希望の輪郭形状になるパラメーターを確認する</c>
+<l>if (false)</l>
+<l>    Metric := 'ignore_local_polarity'</l>
+<l>else</l>
+<l>    Metric := 'ignore_color_polarity'</l>
+<l>endif</l>
+<c>* </c>
+<c></c>
+<l>reduce_domain(Image, Region, SubmitImage)</l>
+<l>determine_deformable_model_params (SubmitImage, 'auto', AngleStart, AngleExtent, scaleMin, scaleMax, 'auto', Metric, 'auto', 'auto', [], [], 'all', ParameterName, ParameterValue)</l>
+<l>Contrast := [ParameterValue[4], ParameterValue[5]]</l>
+<l>return ()</l>
+</body>
+<docu id="get_default_contrast">
+<parameters>
+<parameter id="Contrast"/>
+<parameter id="CreateParams"/>
+<parameter id="Image"/>
+<parameter id="Region"/>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>

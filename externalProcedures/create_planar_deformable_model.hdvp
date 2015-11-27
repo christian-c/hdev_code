@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.0" halcon_version="10.0.3" cs="1018764091">
+<procedure name="create_planar_deformable_model">
+<interface>
+<io>
+<par name="MappedImage"/>
+<par name="Region"/>
+</io>
+<oo>
+<par name="ImageOut"/>
+<par name="FoundContour"/>
+</oo>
+<ic>
+<par name="CamParam"/>
+<par name="ReferencePoseInCam"/>
+<par name="CreateParams"/>
+</ic>
+<oc>
+<par name="ModelID"/>
+</oc>
+</interface>
+<body>
+<c>* CrateParamsの要素数チェック</c>
+<l>if(|CreateParams| # 19)</l>
+<l>    H_ERR_WINPV1 := 1301</l>
+<l>    get_error_text (H_ERR_WINPV1, msg)</l>
+<l>    throw([H_ERR_WINPV1, msg])</l>
+<l>endif</l>
+<c></c>
+<c>* パラメーター取得</c>
+<l>ColorSpace        := CreateParams[0]</l>
+<l>useChannel        := CreateParams[1]</l>
+<c>* FindMinScore</c>
+<l>MinScore          := CreateParams[3]</l>
+<l>AngleStart        := rad(CreateParams[4])</l>
+<l>AngleExtent       := rad(CreateParams[5])</l>
+<l>Greediness        := CreateParams[6]</l>
+<l>findScaleRCMinMax := [CreateParams[7], CreateParams[8], CreateParams[9], CreateParams[10]]</l>
+<l>angle_distortion  := CreateParams[11]</l>
+<l>scale_distortion  := CreateParams[12]</l>
+<c>*numLevelMin</c>
+<l>numLevelMax       := CreateParams[14]</l>
+<c></c>
+<c>* ScaleRMin/Max, ScaleCMinMax</c>
+<l>scaleMin := findScaleRCMinMax[0]</l>
+<l>if (findScaleRCMinMax[0] &gt; findScaleRCMinMax[2])</l>
+<l>    scaleMin := findScaleRCMinMax[2]</l>
+<l>endif</l>
+<l>scaleMax := findScaleRCMinMax[1]</l>
+<l>if (findScaleRCMinMax[1] &lt; findScaleRCMinMax[3])</l>
+<l>    scaleMax := findScaleRCMinMax[3]</l>
+<l>endif</l>
+<c></c>
+<c>* AngleDsitortion, AnisoScaleDistortion</c>
+<l>if (angle_distortion = 'None' and scale_distortion = 'None')</l>
+<l>    findParamNames := []</l>
+<l>    findParamVals  := []</l>
+<l>elseif (angle_distortion # 'None' and scale_distortion = 'None')</l>
+<l>    findParamNames := ['max_angle_distortion']</l>
+<l>    findParamVals  := [angle_distortion]</l>
+<l>elseif (angle_distortion = 'None' and scale_distortion # 'None')</l>
+<l>    findParamNames := ['max_aniso_scale_distortion']</l>
+<l>    findParamVals  := [scale_distortion]  </l>
+<l>else</l>
+<l>    findParamNames := ['max_angle_distortion', 'max_aniso_scale_distortion']</l>
+<l>    findParamVals  := [angle_distortion, scale_distortion] </l>
+<l>endif</l>
+<c></c>
+<c>*Contrast</c>
+<l>contrast := [CreateParams[15], CreateParams[16]]</l>
+<c></c>
+<c>* </c>
+<c>* モデル登録前に，希望の輪郭形状になるパラメーターを確認する</c>
+<l>if (false)</l>
+<l>    Metric := 'ignore_local_polarity'</l>
+<l>else</l>
+<l>    Metric := 'ignore_color_polarity'</l>
+<l>endif</l>
+<c>* </c>
+<l>count_channels (MappedImage, Channels)</l>
+<l>if (Channels = 3)</l>
+<l>    if (ColorSpace = 'None')</l>
+<l>        useChannel := -1</l>
+<l>        copy_obj (MappedImage, ImageOut, 1, -1)</l>
+<l>    elseif (ColorSpace = 'gray')</l>
+<l>        useChannel := -1</l>
+<l>        rgb1_to_gray (MappedImage, ImageOut)</l>
+<l>    elseif (ColorSpace # 'rgb')</l>
+<l>        decompose3 (MappedImage, img1, img2, img3)</l>
+<l>        trans_from_rgb (img1, img2, img3, img1, img2, img3, ColorSpace)</l>
+<l>    else</l>
+<c>        * ColorSpace = 'rgb'</c>
+<l>        decompose3 (MappedImage, img1, img2, img3)</l>
+<l>    endif</l>
+<l>    if (useChannel = -1)</l>
+<c>        * </c>
+<l>    elseif (useChannel = 0)</l>
+<l>        copy_obj (img1, ImageOut, 1, -1)</l>
+<l>    elseif (useChannel = 1)</l>
+<l>        copy_obj (img2, ImageOut, 1, -1)</l>
+<l>    elseif (useChannel = 2)</l>
+<l>        copy_obj (img3, ImageOut, 1, -1)</l>
+<l>    else</l>
+<l>        throw ([30010, 'Wrong channel is specified: ' + useChannel])</l>
+<l>    endif</l>
+<l>else</l>
+<l>    copy_obj (MappedImage, ImageOut, 1, -1)</l>
+<l>endif</l>
+<c></c>
+<l>reduce_domain (ImageOut, Region, SubmitImage)</l>
+<c></c>
+<c>* Contrastは調整済</c>
+<c></c>
+<c>* </c>
+<c>* モデルを登録する</c>
+<l>try</l>
+<l>    clear_deformable_model (ModelID)</l>
+<l>catch (Exception)</l>
+<c>    * </c>
+<l>endtry</l>
+<l>create_planar_calib_deformable_model (SubmitImage, CamParam, ReferencePoseInCam, numLevelMax, \
+                                      AngleStart, AngleExtent, 'auto', \
+                                      findScaleRCMinMax[0], findScaleRCMinMax[1], 'auto', \
+                                      findScaleRCMinMax[2], findScaleRCMinMax[3], 'auto', \
+                                      'auto', Metric, int(contrast), 'auto', [], [], ModelID)</l>
+<c>* </c>
+<c>* テストを兼ねて，モデル中心の変換用データ生成のため，認識を試す</c>
+<c>* モデル生成に使用した画像を使用すること！</c>
+<l>if (true)</l>
+<c>    * モデル画像には重心を含めていない場合もあって、認識のために重心領域にreduceしなおす。</c>
+<c>    * 領域を広めにとっておかないと認識できない場合があるため、以下の半径の円に絞り込む。</c>
+<c>    * - 頭部(UXGA): およそ 半径 60 pixel</c>
+<c>    * - 手先(WVGA): およそ 半径 30 pixel</c>
+<l>    get_domain (SubmitImage, region)</l>
+<l>    area_center (region, _, row, col)</l>
+<l>    get_image_size (SubmitImage, img_w, _)</l>
+<l>    gen_circle (areaCenter, row, col, 30.5 * (img_w / 768.0))</l>
+<l>    reduce_domain (ImageOut, areaCenter, FindImage)</l>
+<l>endif</l>
+<c></c>
+<l>find_planar_calib_deformable_model (FindImage, ModelID, AngleStart, AngleExtent,\
+                                    findScaleRCMinMax[0], findScaleRCMinMax[1],\
+                                    findScaleRCMinMax[2], findScaleRCMinMax[3],\
+                                    MinScore, 1, 0, [numLevelMax,1], Greediness,\
+                                    findParamNames, findParamVals, ObjOrgPoseInCam, _, Scores)</l>
+<l>if (|Scores| = 0)</l>
+<c></c>
+<c>    * 認識失敗</c>
+<l>    V_ERR_MODEL_NOT_FOUND := 10001</l>
+<l>    throw ([V_ERR_MODEL_NOT_FOUND, 'Cannot find matching result with planar deformable model'])</l>
+<l>endif</l>
+<l>gen_deformable_model_contours_trans (ModelContours, ModelID, CamParam)</l>
+<l>gen_contour_for_find_planar_calib_deformable (ModelContours, FoundContour, ObjOrgPoseInCam, CamParam, ModelID)</l>
+<l>dev_clear_window () </l>
+<l>dev_display (MappedImage)</l>
+<l>dev_set_color ('cyan')</l>
+<l>dev_display (FoundContour)</l>
+<c></c>
+<c>* </c>
+<l>return ()</l>
+</body>
+<docu id="create_planar_deformable_model">
+<abstract lang="ja_JP">作成パラメータを用いて，画像から物体を認識し，モデルとして登録する．
+また，その輪郭となるXLDオブジェクトの作成も行う．</abstract>
+<short lang="ja_JP">平面ワーク認識モデル本体を作成する．</short>
+<parameters>
+<parameter id="CamParam">
+<description lang="ja_JP">カメラパラメータ．</description>
+<multivalue>true</multivalue>
+<sem_type>number</sem_type>
+</parameter>
+<parameter id="CreateParams">
+<description lang="ja_JP">モデル作成パラメータ．</description>
+<multivalue>true</multivalue>
+<sem_type>any</sem_type>
+</parameter>
+<parameter id="FoundContour">
+<description lang="ja_JP">作成されたモデルの輪郭．</description>
+<multivalue>false</multivalue>
+<sem_type>xld_cont</sem_type>
+</parameter>
+<parameter id="ImageOut"/>
+<parameter id="MappedImage">
+<description lang="ja_JP">ワークが写された補正画像．補正画像は，歪み補正(ステレオの場合は，平行化)が行われた後の画像を意味する．</description>
+<multichannel>optional</multichannel>
+<multivalue>false</multivalue>
+<sem_type>image</sem_type>
+<type_list>
+<item>int2</item>
+<item>int4</item>
+<item>int8</item>
+</type_list>
+</parameter>
+<parameter id="ModelID">
+<description lang="ja_JP">作成されたモデルのモデルID．これを用いて，ユーザがモデルファイルを保存する．</description>
+<multivalue>false</multivalue>
+<sem_type>integer</sem_type>
+</parameter>
+<parameter id="ReferencePoseInCam">
+<description lang="ja_JP">参照ポーズ．カメラ座標系基準．</description>
+<multivalue>true</multivalue>
+<sem_type>number</sem_type>
+</parameter>
+<parameter id="Region">
+<description lang="ja_JP">選択領域．</description>
+<multivalue>false</multivalue>
+<sem_type>region</sem_type>
+</parameter>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>

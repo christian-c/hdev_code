@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.0" halcon_version="10.0.3" cs="622456949">
+<procedure name="find_planar_deformable_model">
+<interface>
+<io>
+<par name="MappedImage"/>
+<par name="ModelContours"/>
+<par name="FindRegion"/>
+</io>
+<oo>
+<par name="ImageOut"/>
+<par name="FoundContours"/>
+</oo>
+<ic>
+<par name="ModelID"/>
+<par name="CamParam"/>
+<par name="FindParams"/>
+</ic>
+<oc>
+<par name="ObjPoseInCam"/>
+<par name="ObjPoseInCamRaw"/>
+<par name="Score"/>
+</oc>
+</interface>
+<body>
+<c>* FindParamsの要素数チェック</c>
+<l>if(|FindParams| # 42)</l>
+<l>    H_ERR_WINPV3 := 1303</l>
+<l>    get_error_text (H_ERR_WINPV3, msg)</l>
+<l>    throw([H_ERR_WINPV3, msg + ' : ' + |FindParams| + '!=42)'])</l>
+<l>endif</l>
+<c></c>
+<c>* Initialize out values</c>
+<l>Score := -1</l>
+<l>ObjPoseInCam := []</l>
+<l>gen_empty_obj (FoundContours)</l>
+<c>*</c>
+<c>* パラメータの読み込み</c>
+<c>* [0]-[7] は読み捨て</c>
+<l>colorSpace        := FindParams[8]</l>
+<l>useChannel        := FindParams[9]</l>
+<l>findMinScore      := FindParams[10]</l>
+<l>minScore          := FindParams[11]</l>
+<l>angleStart        := rad(FindParams[12])</l>
+<l>angleExtent       := rad(FindParams[13])</l>
+<l>greediness        := FindParams[14]</l>
+<l>findScaleRCMinMax := [FindParams[15], FindParams[16], FindParams[17], FindParams[18]]</l>
+<c></c>
+<l>angle_distortion  := FindParams[19]</l>
+<l>scale_distortion  := FindParams[20]</l>
+<l>if (angle_distortion = 'None' and scale_distortion = 'None')</l>
+<l>    findParamNames := []</l>
+<l>    findParamVals  := []</l>
+<l>elseif (angle_distortion # 'None' and scale_distortion = 'None')</l>
+<l>    findParamNames := ['max_angle_distortion']</l>
+<l>    findParamVals  := [angle_distortion]</l>
+<l>elseif (angle_distortion = 'None' and scale_distortion # 'None')</l>
+<l>    findParamNames := ['max_aniso_scale_distortion']</l>
+<l>    findParamVals  := [scale_distortion]  </l>
+<l>else</l>
+<l>    findParamNames := ['max_angle_distortion', 'max_aniso_scale_distortion']</l>
+<l>    findParamVals  := [angle_distortion, scale_distortion] </l>
+<l>endif</l>
+<l>numLevels         := [FindParams[22], FindParams[21]]</l>
+<l>numMatches        := FindParams[23]</l>
+<c>**</c>
+<l>fixedPose         := [FindParams[24], FindParams[25], FindParams[26], FindParams[27], FindParams[28], FindParams[29]]</l>
+<l>boundX            := [FindParams[30], FindParams[31]]</l>
+<l>boundY            := [FindParams[32], FindParams[33]]</l>
+<l>boundZ            := [FindParams[34], FindParams[35]]</l>
+<l>boundRoll         := [FindParams[36], FindParams[37]]</l>
+<l>boundPitch        := [FindParams[38], FindParams[39]]</l>
+<l>boundYaw          := [FindParams[40], FindParams[41]]</l>
+<c></c>
+<c>    * </c>
+<l>count_channels (MappedImage, Channels)</l>
+<l>if (Channels = 3)</l>
+<l>    if (colorSpace = 'None')</l>
+<l>        useChannel := -1</l>
+<l>        copy_obj (MappedImage, ImageOut, 1, -1)</l>
+<l>    elseif (colorSpace = 'gray')</l>
+<l>        useChannel := -1</l>
+<l>        rgb1_to_gray (MappedImage, ImageOut)</l>
+<l>    elseif (colorSpace # 'rgb')</l>
+<l>        decompose3 (MappedImage, img1, img2, img3)</l>
+<l>        trans_from_rgb (img1, img2, img3, img1, img2, img3, colorSpace)</l>
+<l>    else</l>
+<c>        * colorSpace = 'rgb'</c>
+<l>        decompose3 (MappedImage, img1, img2, img3)</l>
+<l>    endif</l>
+<l>    if (useChannel = -1)</l>
+<c>        * </c>
+<l>    elseif (useChannel = 0)</l>
+<l>        copy_obj (img1, ImageOut, 1, -1)</l>
+<l>    elseif (useChannel = 1)</l>
+<l>        copy_obj (img2, ImageOut, 1, -1)</l>
+<l>    elseif (useChannel = 2)</l>
+<l>        copy_obj (img3, ImageOut, 1, -1)</l>
+<l>    else</l>
+<l>        throw ([30010, 'Wrong channel is specified: ' + useChannel])</l>
+<l>    endif</l>
+<l>else</l>
+<l>    copy_obj (MappedImage, ImageOut, 1, -1)</l>
+<l>endif</l>
+<c></c>
+<l>reduce_domain (ImageOut, FindRegion, SubmitImage)</l>
+<c>* </c>
+<c>* 検索本体</c>
+<l>find_planar_calib_deformable_model (SubmitImage, ModelID, angleStart, angleExtent, findScaleRCMinMax[0], findScaleRCMinMax[1], findScaleRCMinMax[2], findScaleRCMinMax[3], findMinScore, numMatches, 1, numLevels, greediness, findParamNames, findParamVals, objPoseInCams_org, _, scores_org)</l>
+<c></c>
+<c>* 検索で得たobjPoseInCams_org, Scores_orgの組み合わせの内，</c>
+<c>* objPoseInCams_orgがRange内に収まっているもののみ抽出</c>
+<l>get_deformable_model_params(ModelID, 'model_pose', ModelPose)</l>
+<l>pose_to_hom_mat3d (ModelPose, CamToModelPose)</l>
+<l>get_deformable_model_params(ModelID, 'reference_pose', ReferencePose)</l>
+<l>pose_to_hom_mat3d (ReferencePose, CamToReferencePose)</l>
+<l>hom_mat3d_invert (CamToReferencePose, ReferencePoseToCam)</l>
+<l>hom_mat3d_compose (ReferencePoseToCam, CamToModelPose, ReferencePoseToModelPose)</l>
+<l>hom_mat3d_to_pose (ReferencePoseToModelPose, ModelPoseInReferencePose)</l>
+<l>Range := [boundX, boundY, boundZ, boundRoll, boundPitch, boundYaw]</l>
+<l>tuple_gen_const (6, true, TrueTuple)</l>
+<l>objPoseInCams_tmp := []</l>
+<l>scores_tmp := []</l>
+<l>for idx := 0 to |scores_org| - 1 by 1</l>
+<l>    Pose := objPoseInCams_org[idx*7:idx*7+6]</l>
+<l>    CurrentPose := Pose</l>
+<l>    pose_to_hom_mat3d (CurrentPose, CamToCurrentPose)</l>
+<l>    hom_mat3d_compose (ReferencePoseToCam, CamToCurrentPose, ReferencePoseToCurrentPose)</l>
+<l>    hom_mat3d_to_pose (ReferencePoseToCurrentPose, CurrentPoseInReferencePose)</l>
+<l>    CurrentPoseInReferencePose := [CurrentPoseInReferencePose[0]-ModelPoseInReferencePose[0],\
+                                  CurrentPoseInReferencePose[1]-ModelPoseInReferencePose[1],\
+                                  CurrentPoseInReferencePose[2]-ModelPoseInReferencePose[2],\
+                                  CurrentPoseInReferencePose[3:5], 0]</l>
+<l>    check_pose_in_range (CurrentPoseInReferencePose, Range, InRange)</l>
+<l>    if (InRange = TrueTuple)</l>
+<l>        objPoseInCams_tmp := [objPoseInCams_tmp, Pose]</l>
+<l>        scores_tmp := [scores_tmp, scores_org[idx]]</l>
+<l>    endif</l>
+<l>endfor</l>
+<l>objPoseInCams_org := objPoseInCams_tmp</l>
+<l>scores_org := scores_tmp</l>
+<c></c>
+<c>* </c>
+<l>objPoseInCams := []</l>
+<l>scores := []</l>
+<l>indices := []</l>
+<l>angles := []</l>
+<l>if (|scores_org| &gt; 0)</l>
+<c>    * 見つかった物を minScore で絞り込み，モデル生成時の姿勢角との違いをリストアップする</c>
+<l>    for idx := 0 to |scores_org| - 1 by 1</l>
+<l>        if (scores_org[idx] &gt; minScore)</l>
+<l>            indices := [indices, idx]</l>
+<c>            * </c>
+<l>            p1 := objPoseInCams_org[idx*7 : idx*7+6]</l>
+<l>            objPoseInCams := [objPoseInCams, p1]</l>
+<l>            scores := [scores, scores_org[idx]]</l>
+<l>            convert_pose_type (p1, 'Rp+T', 'gba', 'point', p1)</l>
+<l>            p1InCam := [0, 0, 0, p1[3], p1[4], 0, 0]</l>
+<c>            * </c>
+<l>            get_deformable_model_params (ModelID, 'model_pose', p2)</l>
+<l>            convert_pose_type (p2, 'Rp+T', 'gba', 'point', p2)</l>
+<l>            p2InCam := [0, 0, 0, p2[3], p2[4], 0, 0]</l>
+<c>            * </c>
+<l>            pose_to_hom_mat3d (p1InCam, cam_H_p1)</l>
+<l>            pose_to_hom_mat3d (p2InCam, cam_H_p2)</l>
+<l>            hom_mat3d_invert (cam_H_p2, p2_H_cam)</l>
+<l>            hom_mat3d_compose (p2_H_cam, cam_H_p1, p2_H_p1)</l>
+<l>            hom_mat3d_to_pose (p2_H_p1, p1InP2)</l>
+<c>            * </c>
+<l>            convert_pose_type (p1InP2, 'Rp+T', 'rodriguez', 'point', p1InP2Rod)</l>
+<l>            rotX := p1InP2Rod[3]</l>
+<l>            rotY := p1InP2Rod[4]</l>
+<l>            rotZ := p1InP2Rod[5]</l>
+<l>            size := sqrt(rotX*rotX + rotY*rotY + rotZ*rotZ)</l>
+<l>            ang := deg( 2 * atan(size) )</l>
+<c>            * </c>
+<l>            angles := [angles, ang]</l>
+<l>        endif</l>
+<l>    endfor</l>
+<c>    * </c>
+<c>    * 見つかった中で，モデル登録時Poseの傾斜角 (roll, pitch) に近い方を選択する。</c>
+<c>    * 以下が前提。</c>
+<c>    * - ワークが基本的に平面積みであること</c>
+<c>    * - モデル作成時と実運用時が同等の傾斜角であること</c>
+<l>    if (|indices| &gt; 0)</l>
+<l>        sort_pairs (indices, angles, '2', sortedIndices, sortedAngles)</l>
+<l>        idx := sortedIndices[0]</l>
+<c>        * </c>
+<c>        * 認識成功</c>
+<l>        Score := scores[idx]</l>
+<l>        ObjPoseInCam := objPoseInCams[idx*7 : idx*7+6]</l>
+<l>        gen_contour_for_find_planar_calib_deformable (ModelContours, FoundContours, ObjPoseInCam, CamParam, ModelID)</l>
+<l>    endif</l>
+<c>    </c>
+<c>    * FixedPose *</c>
+<l>    ObjPoseInCamRaw := ObjPoseInCam</l>
+<l>    for I:=0 to |fixedPose|-1 by 1</l>
+<l>        if (fixedPose[I] # 'None')</l>
+<l>            ObjPoseInCam[I] := fixedPose[I]</l>
+<l>        endif</l>
+<l>    endfor</l>
+<c></c>
+<l>else</l>
+<c>    * 認識失敗</c>
+<l>endif</l>
+<c>* </c>
+<l>return ()</l>
+<c>* </c>
+</body>
+<docu id="find_planar_deformable_model">
+<abstract lang="ja_JP">認識パラメータを用いて平面ワーク認識を行う</abstract>
+<short lang="ja_JP">平面ワーク認識を行う</short>
+<parameters>
+<parameter id="CamParam">
+<description lang="ja_JP">カメラパラメータ．</description>
+<multivalue>true</multivalue>
+<sem_type>number</sem_type>
+</parameter>
+<parameter id="FindParams">
+<description lang="ja_JP">認識パラメータ．外部設計書の「認識パラメータ」の項を参照．</description>
+<multivalue>true</multivalue>
+<sem_type>any</sem_type>
+</parameter>
+<parameter id="FindRegion">
+<description lang="ja_JP">load_planar_deformable_model()で出力される，モデルの探索領域を表すRegion．</description>
+<multivalue>optional</multivalue>
+<sem_type>region</sem_type>
+</parameter>
+<parameter id="FoundContours">
+<description lang="ja_JP">認識されたモデルの輪郭．</description>
+<multivalue>false</multivalue>
+<sem_type>xld_cont</sem_type>
+</parameter>
+<parameter id="ImageOut"/>
+<parameter id="MappedImage">
+<description lang="ja_JP">ワークが写された補正画像．補正画像は，歪み補正(ステレオの場合は，平行化)が行われた後の画像を意味する．</description>
+<multichannel>optional</multichannel>
+<multivalue>false</multivalue>
+<sem_type>image</sem_type>
+<type_list>
+<item>int2</item>
+<item>int4</item>
+<item>int8</item>
+</type_list>
+</parameter>
+<parameter id="ModelContours">
+<description lang="ja_JP">load_planar_deformable_model()で出力される，モデルの輪郭．</description>
+<multivalue>optional</multivalue>
+<sem_type>xld_cont</sem_type>
+</parameter>
+<parameter id="ModelID">
+<description lang="ja_JP">モデルID．</description>
+<multivalue>false</multivalue>
+<sem_type>integer</sem_type>
+</parameter>
+<parameter id="ObjPoseInCam">
+<description lang="ja_JP">認識された，カメラ座標系基準のワークポーズ．</description>
+<multivalue>true</multivalue>
+<sem_type>pose</sem_type>
+</parameter>
+<parameter id="ObjPoseInCamRaw">
+<description lang="ja_JP">特定の認識パラメータ(Fixed*)で修正される前の，ワークのポーズ．</description>
+</parameter>
+<parameter id="Score">
+<description lang="ja_JP">認識スコア．</description>
+<multivalue>false</multivalue>
+<sem_type>real</sem_type>
+<value_max>1.00</value_max>
+<value_min>0.00</value_min>
+</parameter>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>

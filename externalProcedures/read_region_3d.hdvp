@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.0" halcon_version="10.0.1" cs="321838018">
+<procedure name="read_region_3d">
+<interface>
+<oo>
+<par name="Region"/>
+<par name="RegionWire"/>
+</oo>
+<ic>
+<par name="Filename"/>
+<par name="CamParam"/>
+<par name="ReferencePoseInBase"/>
+<par name="ToolPoseInBase"/>
+<par name="ToolPoseInCam"/>
+</ic>
+<oc>
+<par name="ObjectModel3DID"/>
+</oc>
+</interface>
+<body>
+<c></c>
+<c>* InBase-&gt;InCam</c>
+<l>convert_poses_from_base_to_camera (ToolPoseInBase, ToolPoseInCam, ReferencePoseInBase, ReferencePoseInCam)</l>
+<c></c>
+<c>* dxfファイルを読み込む (ファイルが存在しなければ例外5200：File not found)</c>
+<l>read_object_model_3d (Filename, 'mm', [], [], ObjectModel3DID, Status)</l>
+<c>* 読み込まれた3Dモデルが，ReferencePoseで表現される座標系にあるとし，</c>
+<c>* それをカメラ画像平面に投影する．</c>
+<l>project_object_model_3d (ModelContours, ObjectModel3DID, CamParam, ReferencePoseInCam, [], [])</l>
+<c>* 投影されたxldオブジェクトから，Regionを作成する．</c>
+<l>gen_region_contour_xld (ModelContours, RegionWire, 'filled')</l>
+<l>union1 (RegionWire, Region)</l>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="read_region_3d">
+<abstract lang="ja_JP">GUIで指定された三次元探索領域ファイル(DXF)を読み込み，カメラ画像平面に投影した結果Regionを出力する．</abstract>
+<short lang="ja_JP">DXFファイルから領域を読み込む．</short>
+<parameters>
+<parameter id="CamParam">
+<description lang="ja_JP">カメラパラメータ．</description>
+<mixed_type>optional</mixed_type>
+<multivalue>true</multivalue>
+<sem_type>number</sem_type>
+</parameter>
+<parameter id="Filename">
+<description lang="ja_JP">DXFファイル名．</description>
+<file_ext>
+<item>dxf</item>
+</file_ext>
+<mixed_type>false</mixed_type>
+<multivalue>false</multivalue>
+<sem_type>filename</sem_type>
+<type_list>
+<item>string</item>
+</type_list>
+</parameter>
+<parameter id="ObjectModel3DID">
+<description lang="ja_JP">三次元探索領域を表すモデルID．</description>
+<multivalue>false</multivalue>
+<sem_type>integer</sem_type>
+</parameter>
+<parameter id="ReferencePoseInBase">
+<description lang="ja_JP">DXFファイルの基準となる座標系．</description>
+<mixed_type>optional</mixed_type>
+<multivalue>true</multivalue>
+<sem_type>pose</sem_type>
+</parameter>
+<parameter id="Region">
+<description lang="ja_JP">三次元探索領域をカメラ画像上に投影した領域(外枠のみ)．</description>
+<multivalue>false</multivalue>
+<sem_type>region</sem_type>
+</parameter>
+<parameter id="RegionWire">
+<description lang="ja_JP">Regionをワイヤーフレーム表現した領域．</description>
+<multivalue>optional</multivalue>
+<sem_type>region</sem_type>
+</parameter>
+<parameter id="ToolPoseInBase">
+<description lang="ja_JP">Base座標系原点から見たツールポイント（カメラのマウントされているエンドエフェクタ．首や手首）のポーズ．ロボットのmotionServerから得られる．</description>
+<multivalue>true</multivalue>
+<sem_type>pose</sem_type>
+</parameter>
+<parameter id="ToolPoseInCam">
+<description lang="ja_JP">カメラから見たツールポイントのポーズ．カメラをキャリブレーションした際にファイルに保存される．</description>
+<multivalue>true</multivalue>
+<sem_type>pose</sem_type>
+</parameter>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>

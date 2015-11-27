@@ -1,0 +1,139 @@
+2 6
+1028080174
+wait_mouse_button_state 0 0 2 0
+マウスボタンが希望する状態になるまで待ちます。
+Utilities
+WindowID tuple window
+WaitingButtonState tuple integer
+0
+23
+comment 0 0 1 0 0 3 0 0
+`* ///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+comment 0 0 1 0 0 3 0 0
+`* 
+
+comment 0 0 1 0 0 3 0 0
+`* Wait until mouse button change to desired state.
+Wait until mouse button change to desired state.
+comment 0 0 1 0 0 3 0 0
+`* 
+
+comment 0 0 1 0 0 3 0 0
+`* Usage: Reffer to the HDevelop online help.
+Usage: Reffer to the HDevelop online help.
+comment 0 0 1 0 0 3 0 0
+`* 
+
+comment 0 0 1 0 0 3 0 0
+`* ///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+comment 0 0 1 0 0 3 0 0
+`*
+
+dev_set_preferences 0 0 2 0 0 2 0 0
+`dev_set_preferences ('graphics_window_context_menu', 'false')
+'graphics_window_context_menu'
+'false'
+for 0 0 3 1 0 3 0 0
+for i := 0 to |WaitingButtonState| - 1 by 1
+0
+|WaitingButtonState| - 1
+1
+i
+while 0 0 1 0 1 3 0 0
+`    while (true)
+true
+try 0 0 0 0 2 3 0 0
+`        try
+get_mposition 0 0 1 3 3 1 0 0
+`            get_mposition (WindowID, _, _, Button)
+WindowID
+_
+_
+Button
+if 0 0 1 0 3 3 0 0
+`            if (Button = WaitingButtonState[i])
+Button = WaitingButtonState[i]
+break 0 0 0 0 4 3 0 0
+`                break
+endif 0 0 0 0 3 3 14 0
+`            endif
+catch 0 0 0 1 2 3 12 0
+`        catch (Exception)
+Exception
+endtry 0 0 0 0 2 3 17 0
+`        endtry
+endwhile 0 0 0 0 1 3 11 0
+`    endwhile
+endfor 0 0 0 0 0 3 10 0
+`endfor
+dev_set_preferences 0 0 2 0 0 2 0 0
+`dev_set_preferences ('graphics_window_context_menu', 'true')
+'graphics_window_context_menu'
+'true'
+comment 0 0 1 0 0 3 0 0
+`*
+
+return 0 0 0 0 0 3 0 0
+return ()
+<proc_docu id="wait_mouse_button_state">
+  <abstract lang="en_US">It waits until state ofmouse button change to parameter WaitingButtonState .
+It is possible to specify multiple values to WaitingButtonState.
+
+For detail information of parameter, see get_mposition(). 
+</abstract>
+  <abstract lang="ja_JP">マウスボタンの状態が パラメーター WaitingButtonState になるまで待ちます （while ループ）。
+パラメーター WaitingButtonState に複数値（リスト）を渡すことも可能です。
+
+引数の詳細は get_mposition を参照してください。
+</abstract>
+  <chapters lang="en_US">
+    <item>Utilities</item>
+  </chapters>
+  <chapters lang="ja_JP">
+    <item>Utilities</item>
+  </chapters>
+  <example lang="en_US">wait_mouse_button_state(WindowID, 1)
+wait_mouse_button_state(WindowID, [0, 1])
+</example>
+  <example lang="ja_JP">wait_mouse_button_state(WindowID, 1)
+wait_mouse_button_state(WindowID, [0, 1])
+</example>
+  <library lang="en_US">NEXTAGE Vision Procedures</library>
+  <library lang="ja_JP">NEXTAGE Vision Procedures</library>
+  <see_also>
+    <item>get_mposition</item>
+  </see_also>
+  <short lang="en_US">Wait until mouse button change to desired state.</short>
+  <short lang="ja_JP">マウスボタンが希望する状態になるまで待ちます。</short>
+  <parameters>
+    <parameter id="WaitingButtonState">
+      <default_value>1</default_value>
+      <description lang="en_US">List of value ofdepressed mouse button or 0</description>
+      <description lang="ja_JP">押されたマウスボタンの値または 0 のリスト</description>
+      <mixed_type>false</mixed_type>
+      <multivalue>optional</multivalue>
+      <sem_type>integer</sem_type>
+      <type_list>
+        <item>integer</item>
+      </type_list>
+      <values>
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>4</item>
+      </values>
+    </parameter>
+    <parameter id="WindowID">
+      <description lang="en_US">Window handle</description>
+      <description lang="ja_JP">ウィンドウハンドル</description>
+      <mixed_type>false</mixed_type>
+      <multivalue>false</multivalue>
+      <sem_type>window</sem_type>
+      <type_list>
+        <item>integer</item>
+      </type_list>
+    </parameter>
+  </parameters>
+</proc_docu>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.0" halcon_version="10.0.1" cs="170259700">
+<procedure name="write_ordered_parameters">
+<interface>
+<ic>
+<par name="DefaultFilename"/>
+<par name="Filename"/>
+<par name="Params"/>
+</ic>
+</interface>
+<body>
+<c>* 参照用のデフォルトパラメータファイルを開く</c>
+<l>read_ordered_default_parameters (DefaultFilename, ParamNames, ParamValues, _)</l>
+<c></c>
+<l>if (|Params| # |ParamNames|)</l>
+<l>    H_ERR_WINPV3 := 1303</l>
+<l>    get_error_text (H_ERR_WINPV3, msg)</l>
+<l>    throw([H_ERR_WINPV3, msg + ' : Params(' + |Params| + ')!=Default(' + |ParamNames| + ')'])</l>
+<l>endif</l>
+<c></c>
+<c>* ファイルを書き込む</c>
+<l>open_file (Filename, 'output', FileHandle)</l>
+<l>fwrite_string (FileHandle, ['#\n# parameters\n#\n'])</l>
+<l>for I := 0 to |ParamNames|-1 by 1</l>
+<l>    if (Params[I] = '')</l>
+<l>        value := ParamValues[I]</l>
+<l>    else</l>
+<l>        value := Params[I]</l>
+<l>    endif</l>
+<l>    fwrite_string (FileHandle, [ParamNames[I], ' : ', value,'\n'])</l>
+<l>endfor</l>
+<l>close_file (FileHandle)</l>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="write_ordered_parameters">
+<abstract lang="ja_JP">デフォルトパラメータファイルを参照し，パラメータをファイルに書き込む</abstract>
+<short lang="ja_JP">パラメータをファイルに書き込む</short>
+<parameters>
+<parameter id="DefaultFilename">
+<description lang="ja_JP">デフォルトファイル名</description>
+<mixed_type>false</mixed_type>
+<multivalue>false</multivalue>
+<sem_type>filename</sem_type>
+<type_list>
+<item>string</item>
+</type_list>
+</parameter>
+<parameter id="Filename">
+<description lang="ja_JP">パラメータファイル名</description>
+<mixed_type>false</mixed_type>
+<multivalue>false</multivalue>
+<sem_type>filename</sem_type>
+<type_list>
+<item>string</item>
+</type_list>
+</parameter>
+<parameter id="Params">
+<description lang="ja_JP">パラメータ</description>
+<multivalue>true</multivalue>
+<sem_type>any</sem_type>
+</parameter>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>

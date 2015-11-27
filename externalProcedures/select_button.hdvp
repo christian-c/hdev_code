@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.0" halcon_version="10.0.1" cs="908100679">
+<procedure name="select_button">
+<interface>
+<ic>
+<par name="WindowHandle"/>
+<par name="Texts"/>
+<par name="Rows"/>
+<par name="Columns"/>
+<par name="TextColor"/>
+<par name="BgColor1"/>
+<par name="BgColor2"/>
+<par name="Margin"/>
+<par name="FontSize"/>
+</ic>
+<oc>
+<par name="SelectedIndex"/>
+</oc>
+</interface>
+<body>
+<c>*</c>
+<l>get_rgb (WindowHandle, Red, Green, Blue)</l>
+<l>get_part (WindowHandle, Row1Part, Column1Part, Row2Part, Column2Part)</l>
+<l>get_window_extents (WindowHandle, RowWin, ColumnWin, WidthWin, HeightWin)</l>
+<l>set_part (WindowHandle, 0, 0, HeightWin-1, WidthWin-1)</l>
+<l>set_system (['width', 'height'], [WidthWin, HeightWin])</l>
+<c></c>
+<c>* Font設定</c>
+<l>set_font (WindowHandle, '-Meiryo UI-' + FontSize + '-*-0-0-0-0-SHIFTJIS_CHARSET-')</l>
+<c></c>
+<c>* ボタン背景とテキスト</c>
+<l>Width := []</l>
+<l>Height := []</l>
+<l>gen_empty_obj (Buttons)</l>
+<l>for I := 0 to |Texts|-1 by 1</l>
+<l>    get_string_extents (WindowHandle, Texts[I], Ascent, Descent, _Width, _Height)</l>
+<l>    Width :=  [Width, _Width + Margin*2]</l>
+<l>    Height := [Height, _Height + Margin*2]</l>
+<l>    gen_rectangle1 (Rectangle, Rows[I], Columns[I], Rows[I]+Height[I], Columns[I]+Width[I])</l>
+<l>    concat_obj (Buttons, Rectangle, Buttons)</l>
+<l>    set_color (WindowHandle, BgColor1)</l>
+<l>    disp_region (Rectangle, WindowHandle)</l>
+<l>    set_tposition (WindowHandle, Rows[I]+Margin, Columns[I]+Margin)</l>
+<l>    set_color (WindowHandle, TextColor)</l>
+<l>    write_string (WindowHandle, Texts[I])</l>
+<l>endfor</l>
+<c></c>
+<l>SelectFlag := -1</l>
+<l>Clicked := false</l>
+<l>while (true)</l>
+<l>    wait_seconds (0.1)</l>
+<l>    try</l>
+<l>        get_mposition (WindowHandle, mRow, mColumn, Button)</l>
+<l>    catch (Exception)</l>
+<l>        continue</l>
+<l>    endtry</l>
+<c>    * 先ずボタン状にマウスポインタがあるかをチェック</c>
+<l>    test_region_point (Buttons, mRow, mColumn, IsInside)</l>
+<l>    if (not IsInside)</l>
+<l>        if(SelectFlag &gt;= 0)</l>
+<l>            I := SelectFlag</l>
+<l>            select_obj (Buttons, ButtonSelected, I+1)</l>
+<l>            gen_rectangle1 (ButtonSelected, Rows[I], Columns[I], Rows[I]+Height[I], Columns[I]+Width[I])</l>
+<l>            set_color (WindowHandle, BgColor1)</l>
+<l>            disp_region (ButtonSelected, WindowHandle)</l>
+<l>            set_tposition (WindowHandle, Rows[I]+Margin, Columns[I]+Margin)</l>
+<l>            set_color (WindowHandle, TextColor)</l>
+<l>            write_string (WindowHandle, Texts[I])</l>
+<l>            SelectFlag := -1</l>
+<l>        endif</l>
+<l>        continue</l>
+<l>    endif</l>
+<c>    * 次に，どのボタン状にマウスカーソルがあるのかをチェック</c>
+<l>    for I := 0 to |Texts|-1 by 1</l>
+<l>        select_obj (Buttons, ButtonSelected, I+1)</l>
+<l>        test_region_point (ButtonSelected, mRow, mColumn, IsInside)</l>
+<l>        if (IsInside)</l>
+<l>            SelectFlag := I</l>
+<l>            if (Button = 1)</l>
+<l>                Clicked := true</l>
+<l>                break</l>
+<l>            endif</l>
+<l>            set_color (WindowHandle, BgColor2)</l>
+<l>        else</l>
+<l>            set_color (WindowHandle, BgColor1)</l>
+<l>        endif</l>
+<l>        disp_region (ButtonSelected, WindowHandle)</l>
+<l>        set_tposition (WindowHandle, Rows[I]+Margin, Columns[I]+Margin)</l>
+<l>        set_color (WindowHandle, TextColor)</l>
+<l>        write_string (WindowHandle, Texts[I])</l>
+<l>    endfor</l>
+<c>    </c>
+<c>    * ボタンが押下されていればBreak</c>
+<l>    if (Clicked)</l>
+<l>        break</l>
+<l>    endif</l>
+<l>endwhile</l>
+<l>SelectedIndex := SelectFlag</l>
+<c></c>
+<l>set_rgb (WindowHandle, Red, Green, Blue)</l>
+<l>set_part (WindowHandle, Row1Part, Column1Part, Row2Part, Column2Part)</l>
+<l>set_system (['width', 'height'], [WidthWin, HeightWin])</l>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="select_button">
+<parameters>
+<parameter id="BgColor1"/>
+<parameter id="BgColor2"/>
+<parameter id="Columns"/>
+<parameter id="FontSize"/>
+<parameter id="Margin"/>
+<parameter id="Rows"/>
+<parameter id="SelectedIndex"/>
+<parameter id="TextColor"/>
+<parameter id="Texts"/>
+<parameter id="WindowHandle"/>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>
